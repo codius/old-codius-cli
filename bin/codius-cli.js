@@ -2,6 +2,8 @@
 const chalk = require('chalk')
 const CodiusCli = require('../src')
 const Config = require('../src/config')
+const debug = require('debug')('codius-cli')
+const logger = require('riverpig')('codius-cli')
 
 const yargs = require('yargs')
   .option('manifest', {
@@ -40,9 +42,9 @@ const yargs = require('yargs')
     description: 'Contract id to extend'
   })
   .command('start', 'Start contract upload process', {}, argv => {
-    console.log('uploading contract...')
+    logger.info('uploading contract...')
   })
   .command('*', '', {}, argv => {
-    console.error('unknown command.')
+    debug('unknown command.')
     process.exit(1)
   }).argv
