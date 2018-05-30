@@ -13,9 +13,9 @@ const nonce = {
   }
 }
 
-const hashManifest = {
-  'hash-manifest': {
-    alias: 'hm',
+const privateVarHash = {
+  'private-var-hash': {
+    alias: 'pvh',
     type: 'boolean',
     default: false,
     description: 'Generate manifest hash'
@@ -27,7 +27,8 @@ const duration = {
     alias: 'd',
     type: 'number',
     default: 3600,
-    description: 'Duration the contract should run (seconds)'
+    description: 'Duration the contract should run (seconds)',
+    demandOption: true
   }
 }
 
@@ -45,7 +46,8 @@ const maxPrice = {
     alias: 'mp',
     type: 'number',
     // TODO: set default max-price
-    description: 'Max price for contract'
+    description: 'Max price for contract',
+    demandOption: true
   }
 }
 
@@ -54,7 +56,8 @@ const hosts = {
     alias: 'h',
     type: 'number',
     default: 1,
-    description: 'The number of hosts for the contract to run on'
+    description: 'The number of hosts for the contract to run on',
+    demandOption: true
   }
 }
 
@@ -76,39 +79,23 @@ const validate = {
   }
 }
 
-const contractId = {
-  'contract-id': {
-    alias: 'cid',
-    type: 'string', // TODO: Should this be a number or a string?
-    description: 'The Id of the contract',
-    demandOption: true
-  }
-}
-
 const configOptions = {
   ...nonce,
-  ...hashManifest,
-  ...maxPrice,
-  ...duration,
-  ...hosts,
+  ...privateVarHash,
   ...validate
 }
 
 const extendOptions = {
-  ...contractId,
-  ...maxPrice, // Should this be in the extend options?
+  ...maxPrice,
   ...extendDuration,
-  ...hosts, // Should this be in the extend options?
+  ...hosts,
   ...noPrompt
 }
 
 const uploadOptions = {
-  ...nonce,
-  ...hashManifest,
   ...maxPrice,
   ...duration,
   ...hosts,
-  // TODO: Should we allow validation to be skipped?
   ...noPrompt
 }
 
