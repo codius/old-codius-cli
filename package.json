@@ -2,9 +2,9 @@
   "name": "codius-cli",
   "version": "1.0.0",
   "description": "Command Line Interface for Codius",
-  "main": "index.js",
+  "main": "bin/codius-cli.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "nyc mocha",
     "lint": "eslint ."
   },
   "repository": {
@@ -24,19 +24,41 @@
     "codius-cli": "./bin/codius-cli.js"
   },
   "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
     "eslint": "^4.16.0",
     "eslint-config-standard": "^11.0.0-beta.0",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-node": "^5.2.1",
     "eslint-plugin-promise": "^3.6.0",
-    "eslint-plugin-standard": "^3.0.1"
+    "eslint-plugin-standard": "^3.0.1",
+    "mocha": "^5.2.0",
+    "nyc": "^11.8.0",
+    "sinon": "^5.0.10"
   },
   "dependencies": {
     "debug": "^3.1.0",
     "ilp-fetch": "^1.2.0",
     "moneyd": "^4.0.0",
     "riverpig": "^1.1.3",
-    "standard": "^11.0.1",
     "yargs": "^11.0.0"
+  },
+  "nyc": {
+    "check-coverage": true,
+    "lines": 80,
+    "statements": 80,
+    "functions": 80,
+    "branches": 80,
+    "include": [
+      "src/**/*.js"
+    ],
+    "exclude": [
+      "test/**/*.js"
+    ],
+    "reporter": [
+      "lcov",
+      "text-summary"
+    ],
+    "all": true
   }
 }
