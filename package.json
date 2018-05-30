@@ -4,7 +4,7 @@
   "description": "Command Line Interface for Codius",
   "main": "bin/codius-cli.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "nyc mocha",
     "lint": "eslint ."
   },
   "repository": {
@@ -33,6 +33,7 @@
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-standard": "^3.0.1",
     "mocha": "^5.2.0",
+    "nyc": "^11.8.0",
     "sinon": "^5.0.10"
   },
   "dependencies": {
