@@ -51,13 +51,12 @@ const maxPrice = {
   }
 }
 
-const hosts = {
-  hosts: {
-    alias: 'h',
+const hostNumber = {
+  'host-number': {
+    alias: 'n',
     type: 'number',
     default: 1,
-    description: 'The number of hosts for the contract to run on',
-    demandOption: true
+    description: 'The number of hosts for the contract to run on'
   }
 }
 
@@ -79,6 +78,23 @@ const validate = {
   }
 }
 
+const addHostEnv = {
+  'add-host-env': {
+    alias: 'add',
+    type: 'boolean',
+    default: false,
+    description: 'Adds the hosts used to the $HOSTS env in the manifest'
+  }
+}
+
+const setHost = {
+  host: {
+    alias: 'h',
+    type: 'string',
+    description: 'Host to use for contract. Cannot be used with host-number command'
+  }
+}
+
 const configOptions = {
   ...nonce,
   ...privateVarHash,
@@ -88,14 +104,15 @@ const configOptions = {
 const extendOptions = {
   ...maxPrice,
   ...extendDuration,
-  ...hosts,
   ...noPrompt
 }
 
 const uploadOptions = {
   ...maxPrice,
   ...duration,
-  ...hosts,
+  ...hostNumber,
+  ...addHostEnv,
+  ...setHost,
   ...noPrompt
 }
 

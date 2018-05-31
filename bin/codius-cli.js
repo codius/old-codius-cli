@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 const chalk = require('chalk')
-const CodiusCli = require('../src')
 const Config = require('../src/config')
 const debug = require('debug')('codius-cli')
 const logger = require('riverpig')('codius-cli')
@@ -11,4 +10,6 @@ const yargs = require('yargs')
       .command('*', '', {}, argv => {
         debug('unknown command.')
         process.exit(1)
-      }).argv
+      })
+      .conflicts('host', 'host-number')
+      .argv
