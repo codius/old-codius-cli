@@ -55,7 +55,6 @@ const hostNumber = {
   'host-number': {
     alias: 'n',
     type: 'number',
-    default: 1,
     description: 'The number of hosts for the contract to run on'
   }
 }
