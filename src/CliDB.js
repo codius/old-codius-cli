@@ -22,7 +22,7 @@ module.exports = class Database {
     }
     debug(`Initialize DB at: ${homeDir}`)
     try {
-      this.db = level(homeDir)
+      this.db = level(homeDir, { valueEncoding: 'json' })
     } catch (err) {
       throw err
     }
@@ -33,7 +33,7 @@ module.exports = class Database {
   }
 
   async getHosts () {
-    return this.loadValue(HOSTS_KEY, '[]')
+    return this.loadValue(HOSTS_KEY, [])
   }
 
   async addHosts (hostsArr) {
@@ -47,7 +47,7 @@ module.exports = class Database {
   }
 
   async saveValue (key, value) {
-    await this.db.put(key, JSON.stringify(value))
+    await this.db.put(key, value)
   }
 
   async loadValue (key, defaultValue = '') {
@@ -62,6 +62,6 @@ module.exports = class Database {
         throw err
       }
     }
-    return JSON.parse(value)
+    return value
   }
 }
