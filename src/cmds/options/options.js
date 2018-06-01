@@ -96,7 +96,7 @@ const setHost = {
   host: {
     alias: 'h',
     type: 'string',
-    description: 'Host to use for contract. Cannot be used with host-number command'
+    description: 'Host to use for contract, multiple hosts may be used by repeating this option for each host. Cannot be used with host-number command'
   }
 }
 
