@@ -41,13 +41,19 @@ const extendDuration = {
   }
 }
 
-const maxPrice = {
-  'max-price': {
-    alias: 'mp',
+const maxMonthlyRate = {
+  'max-monthly-rate': {
+    alias: 'max',
     type: 'number',
-    // TODO: set default max-price
-    description: 'Max price for contract',
-    demandOption: true
+    description: 'Max monthly price per contract per host, requires --units flag to be set.'
+  }
+}
+
+const units = {
+  'units': {
+    alias: 'u',
+    type: 'string',
+    description: 'Units to use for the max monthly price, ex \'XRP\''
   }
 }
 
@@ -101,14 +107,16 @@ const configOptions = {
 }
 
 const extendOptions = {
-  ...maxPrice,
   ...extendDuration,
+  ...maxMonthlyRate,
+  ...units,
   ...noPrompt
 }
 
 const uploadOptions = {
-  ...maxPrice,
   ...duration,
+  ...maxMonthlyRate,
+  ...units,
   ...hostNumber,
   ...addHostEnv,
   ...setHost,

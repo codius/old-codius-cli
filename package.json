@@ -41,6 +41,8 @@
     "canonical-json": "0.0.4",
     "debug": "^3.1.0",
     "ilp-fetch": "^1.2.0",
+    "ilp-plugin": "^3.1.1",
+    "ilp-price": "^1.0.0",
     "level": "^4.0.0",
     "lodash.samplesize": "^4.2.0",
     "moneyd": "^4.0.0",

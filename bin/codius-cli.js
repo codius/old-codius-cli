@@ -12,4 +12,6 @@ const yargs = require('yargs')
         process.exit(1)
       })
       .conflicts('host', 'host-number')
+      .implies('max-monthly-price', 'units')
+      .implies('units', 'max-monthly-price')
       .argv

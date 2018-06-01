@@ -5,5 +5,10 @@
  */
 
 module.exports = {
-  peers: ['http://localhost:3000'] // TODO: Update to a proper list of peers to default to
+  peers: ['http://localhost:3000'], // TODO: Update to a proper list of peers to default to
+  price: {
+    month: {
+      xrp: 10
+    }
+  }
 }
