@@ -41,23 +41,27 @@ const extendDuration = {
   }
 }
 
-const maxPrice = {
-  'max-price': {
-    alias: 'mp',
+const maxMonthlyRate = {
+  'max-monthly-rate': {
+    alias: 'max',
     type: 'number',
-    // TODO: set default max-price
-    description: 'Max price for contract',
-    demandOption: true
+    description: 'Max monthly price per contract per host, requires --units flag to be set.'
   }
 }
 
-const hosts = {
-  hosts: {
-    alias: 'h',
+const units = {
+  'units': {
+    alias: 'u',
+    type: 'string',
+    description: 'Units to use for the max monthly price, ex \'XRP\''
+  }
+}
+
+const hostNumber = {
+  'host-number': {
+    alias: 'n',
     type: 'number',
-    default: 1,
-    description: 'The number of hosts for the contract to run on',
-    demandOption: true
+    description: 'The number of hosts for the contract to run on'
   }
 }
 
@@ -79,6 +83,23 @@ const validate = {
   }
 }
 
+const addHostEnv = {
+  'add-host-env': {
+    alias: 'add',
+    type: 'boolean',
+    default: false,
+    description: 'Adds the hosts used to the $HOSTS env in the manifest'
+  }
+}
+
+const setHost = {
+  host: {
+    alias: 'h',
+    type: 'string',
+    description: 'Host to use for contract, multiple hosts may be used by repeating this option for each host. Cannot be used with host-number command'
+  }
+}
+
 const configOptions = {
   ...nonce,
   ...privateVarHash,
@@ -86,16 +107,19 @@ const configOptions = {
 }
 
 const extendOptions = {
-  ...maxPrice,
   ...extendDuration,
-  ...hosts,
+  ...maxMonthlyRate,
+  ...units,
   ...noPrompt
 }
 
 const uploadOptions = {
-  ...maxPrice,
   ...duration,
-  ...hosts,
+  ...maxMonthlyRate,
+  ...units,
+  ...hostNumber,
+  ...addHostEnv,
+  ...setHost,
   ...noPrompt
 }
 
