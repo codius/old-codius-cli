@@ -18,7 +18,7 @@ const privateVarHash = {
     alias: 'pvh',
     type: 'boolean',
     default: false,
-    description: 'Generate manifest hash'
+    description: 'Generate manifest hash for private variables'
   }
 }
 
@@ -57,11 +57,11 @@ const units = {
   }
 }
 
-const hostNumber = {
-  'host-number': {
-    alias: 'n',
+const hostCount = {
+  'host-count': {
+    alias: 'c',
     type: 'number',
-    description: 'The number of hosts for the contract to run on'
+    description: 'The number of hosts for the contract to run on, default to 1 if not specified'
   }
 }
 
@@ -74,21 +74,12 @@ const noPrompt = {
   }
 }
 
-const validate = {
-  validate: {
-    alias: 'val',
-    type: 'boolean',
-    default: false,
-    description: 'Validates the manifest configuration'
-  }
-}
-
 const addHostEnv = {
   'add-host-env': {
     alias: 'add',
     type: 'boolean',
     default: false,
-    description: 'Adds the hosts used to the $HOSTS env in the manifest'
+    description: 'Adds a $HOST env for each conatiner in the manifest that contains other hosts running the same contract'
   }
 }
 
@@ -96,14 +87,22 @@ const setHost = {
   host: {
     alias: 'h',
     type: 'string',
-    description: 'Host to use for contract, multiple hosts may be used by repeating this option for each host. Cannot be used with host-number command'
+    description: 'Host to use for contract, multiple hosts may be used by repeating this option for each host. Cannot be used with host-count command'
+  }
+}
+
+const removeAllHosts = {
+  'remove-all-hosts': {
+    alias: 'rall',
+    type: 'boolean',
+    default: false,
+    description: 'Removes all hosts from the local database'
   }
 }
 
 const configOptions = {
   ...nonce,
-  ...privateVarHash,
-  ...validate
+  ...privateVarHash
 }
 
 const extendOptions = {
@@ -117,14 +116,19 @@ const uploadOptions = {
   ...duration,
   ...maxMonthlyRate,
   ...units,
-  ...hostNumber,
-  ...addHostEnv,
+  ...hostCount,
   ...setHost,
+  ...addHostEnv,
   ...noPrompt
+}
+
+const hostOptions = {
+  ...removeAllHosts
 }
 
 module.exports = {
   configOptions,
   uploadOptions,
-  extendOptions
+  extendOptions,
+  hostOptions
 }
