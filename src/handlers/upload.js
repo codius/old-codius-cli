@@ -36,7 +36,6 @@ async function addHostsToManifest ({ manifest, addHostEnv }, manifestJson, hosts
       container.environment = container.environment || {}
       container.environment.HOSTS = JSON.stringify(hosts)
     }
-    // await fse.writeJson(manifest, manifestJson)
   }
 }
 
