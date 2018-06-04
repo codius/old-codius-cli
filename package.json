@@ -1,8 +1,8 @@
 {
-  "name": "codius-cli",
+  "name": "codius",
   "version": "1.0.0",
   "description": "Command Line Interface for Codius",
-  "main": "bin/codius-cli.js",
+  "main": "bin/codius.js",
   "scripts": {
     "test": "nyc mocha",
     "lint": "eslint ."
@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/coilhq/codius-cli#readme",
   "bin": {
-    "codius-cli": "./bin/codius-cli.js"
+    "codius": "./bin/codius.js"
   },
   "devDependencies": {
     "chai": "^4.1.2",
