@@ -28,7 +28,7 @@ const duration = {
   duration: {
     alias: 'd',
     type: 'number',
-    default: parseInt(config.duration),
+    default: config.duration,
     description: 'Duration the contract should run (seconds) defaults to 10 mins'
   }
 }
