@@ -11,7 +11,6 @@ yargs.commandDir('../src/cmds')
     process.exit(1)
   })
   .conflicts('host', 'host-count')
-  .conflicts('list', 'get-pod-manifest')
   .implies('max-monthly-price', 'units')
   .implies('units', 'max-monthly-price')
   .argv
