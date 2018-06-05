@@ -30,10 +30,10 @@ class CliDB {
   }
 
   async getHosts () {
-    const hosts = await this.loadValue(HOSTS_KEY, config.peers)
+    let hosts = await this.loadValue(HOSTS_KEY, config.peers)
     // If the length is 0 add the base config peers back.
     if (hosts.length === 0) {
-      hosts.push(config.peers)
+      hosts = config.peers
     }
     return hosts
   }

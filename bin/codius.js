@@ -7,7 +7,7 @@ const debug = require('debug')('codius-cli')
 yargs.commandDir('../src/cmds')
   .help()
   .command('*', '', {}, argv => {
-    debug('unknown command.')
+    console.error('Unknown Command, use --help for command options.')
     process.exit(1)
   })
   .conflicts('host', 'host-count')
