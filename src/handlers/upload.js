@@ -52,7 +52,7 @@ async function uploadToHosts ({ maxMonthlyRate, units, duration }, manifestJson,
       })
       const priceQuote = new BigNumber((await optionsResp.json()).price)
       if (priceQuote.isGreaterThan(maxPrice)) {
-        failedPrices.push({ host: host, quotedPrice: priceQuote, maxPrice })
+        failedPrices.push({ host: host, quotedPrice: priceQuote.toString(), maxPrice })
       }
     } catch (err) {
       console.error(`Fetching price quote from host ${host} failed, please try again`)
@@ -62,10 +62,11 @@ async function uploadToHosts ({ maxMonthlyRate, units, duration }, manifestJson,
 
   if (failedPrices.length > 0) {
     console.error('Quoted price from hosts exceeded specified max price from the following hosts')
-    failedPrices.forEach(price => console.error(JSON.stringify(price)))
+    console.error(failedPrices)
     console.error('Please update your max price to successfully upload your contract.')
     throw new Error('Quoted Price exceeded specified max price for contracts.')
   }
+  debug('Price Quotes successful')
 
   const respObj = {
     success: [],
@@ -111,12 +112,12 @@ async function uploadToHosts ({ maxMonthlyRate, units, duration }, manifestJson,
 
   if (respObj.success.length > 0) {
     console.log('Successfully Uploaded Pods to:')
-    respObj.success.forEach(contract => console.log(contract))
+    console.log(respObj.success)
   }
 
   if (respObj.failed.length > 0) {
     console.log('Failed To Upload Pods to:')
-    respObj.failed.forEach(contract => console.log(contract))
+    console.log(respObj.failed)
   }
   return respObj
 }
@@ -132,7 +133,7 @@ async function updateDatabaseWithHosts (manifestJson, respObj) {
         expiry: obj.expiry
       }
     })
-    debug(`Saving to cli-db Hosts: ${JSON.stringify(hostsObj)}`)
+    debug(`Saving to cli-db Hosts: ${JSON.stringify(hostsObj, null, 2)}`)
 
     const manifestObj = {
       manifest: manifestJson,
@@ -162,5 +163,7 @@ async function upload (options) {
 }
 
 module.exports = {
-  upload
+  upload,
+  uploadToHosts,
+  updateDatabaseWithHosts
 }
