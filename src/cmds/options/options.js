@@ -4,6 +4,8 @@
  * @author Travis Crist
  */
 
+const config = require('../../config.js')
+
 const nonce = {
   nonce: {
     alias: 'n',
@@ -26,9 +28,8 @@ const duration = {
   duration: {
     alias: 'd',
     type: 'number',
-    default: 3600,
-    description: 'Duration the contract should run (seconds)',
-    demandOption: true
+    default: parseInt(config.duration),
+    description: 'Duration the contract should run (seconds) defaults to 10 mins'
   }
 }
 

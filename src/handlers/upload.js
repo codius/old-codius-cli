@@ -148,7 +148,10 @@ async function upload (options) {
 
   try {
     // TODO: Add manifest validation before starting upload
-    await discoverHosts()
+    // Skip discover if --host option is used.
+    if (!options.host) {
+      await discoverHosts()
+    }
     const uploadHosts = await selectDistributedHosts(options)
     const manifestJson = await fse.readJson(options.manifest)
     await addHostsToManifest(options, manifestJson, uploadHosts)
