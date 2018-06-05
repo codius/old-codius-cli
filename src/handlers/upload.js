@@ -28,7 +28,6 @@ async function addHostsToManifest ({ manifest, addHostEnv }, manifestJson, hosts
     debug('Adding hosts to $HOST env in manifest')
     const containers = manifestJson.manifest.containers
     for (const container of containers) {
-      console.log(container.environment.HOSTS)
       if (container.environment.HOSTS) {
         console.error('Error: HOSTS env variable already exists in a container. Option --add-hosts-env cannot be used if the HOSTS env already exists in any container.')
         throw new Error('HOSTS env variable already exists in a container.')
@@ -126,7 +125,7 @@ async function updateDatabaseWithHosts (manifestJson, respObj) {
   debug('Saving successful uploaded pods to CliDB')
   if (respObj.success.length > 0) {
     const manifestHash = hashManifest(manifestJson.manifest)
-    const existingManifestData = await db.loadValue(manifestHash, {})
+    const existingManifestData = await db.getManifestData(manifestHash)
     let hostsObj = existingManifestData.hosts || {}
     respObj.success.forEach(obj => {
       hostsObj[obj.host] = {
