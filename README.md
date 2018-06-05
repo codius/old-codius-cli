@@ -2,6 +2,6 @@
 
 > Command Line Interface for Codius
 
-## ## License
+## License
 
 Apache-2.0

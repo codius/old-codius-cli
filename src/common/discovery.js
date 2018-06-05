@@ -8,6 +8,7 @@ const db = require('../common/cli-db.js')
 const axios = require('axios')
 const debug = require('debug')('codius-cli:discovery')
 const sampleSize = require('lodash.samplesize')
+const config = require('../config.js')
 
 const HOSTS_PER_DISCOVERY = 5
 
@@ -15,7 +16,9 @@ async function findHosts () {
   const hostSample = sampleSize(await db.getHosts(), HOSTS_PER_DISCOVERY)
   for (const host of hostSample) {
     try {
-      const res = await axios.get(host + '/peers')
+      const res = await axios.get(host + '/peers', {
+        headers: { Accept: `application/codius-v${config.version.codius.min}+json` }
+      })
       await db.addHosts(res.data.peers)
     } catch (err) {
       db.removeHost(host)

@@ -11,5 +11,10 @@ module.exports = {
       xrp: 10
     }
   },
-  duration: 600
+  duration: 600,
+  version: {
+    codius: {
+      min: 1
+    }
+  }
 }

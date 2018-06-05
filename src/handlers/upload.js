@@ -13,6 +13,7 @@ const BigNumber = require('bignumber.js')
 const db = require('../common/cli-db.js')
 const { discoverHosts, selectDistributedHosts } = require('../common/discovery.js')
 const { hashManifest } = require('../common/crypto-utils.js')
+const config = require('../config.js')
 
 function checkOptions ({ hostCount, addHostEnv }) {
   // If the host number is set but the add host env is not specified warn the user
@@ -46,7 +47,10 @@ async function uploadToHosts ({ maxMonthlyRate, units, duration }, manifestJson,
   for (const host of hosts) {
     try {
       const optionsResp = await fetch(`${host}/pods?duration=${duration}`, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          Accept: `application/codius-v${config.version.codius.min}+json`,
+          'Content-Type': 'application/json'
+        },
         method: 'OPTIONS',
         body: JSON.stringify(manifestJson)
       })
@@ -77,7 +81,10 @@ async function uploadToHosts ({ maxMonthlyRate, units, duration }, manifestJson,
     let resp
     try {
       resp = await fetch(`${host}/pods?duration=${duration}`, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          Accept: `application/codius-v${config.version.codius.min}+json`,
+          'Content-Type': 'application/json'
+        },
         maxPrice: maxPrice,
         method: 'POST',
         body: JSON.stringify(manifestJson)
