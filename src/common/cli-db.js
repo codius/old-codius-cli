@@ -1,18 +1,19 @@
 /**
  * @fileOverview Database for storing uploaded manifests by manifest hash and known peers.
- * @name CliDB.js
+ * @name cli-db.js
  * @author Travis Crist
  */
 
 const level = require('level')
-const config = require('./config.js')
-const debug = require('debug')('codius-cli:CliDB')
+const config = require('../config.js')
+const debug = require('debug')('codius-cli:cli-db')
 const os = require('os')
 const path = require('path')
 
 const HOSTS_KEY = 'codiusHosts'
+const MANIFEST_HASHES_KEY = 'manifestHashes'
 
-module.exports = class Database {
+class CliDB {
   constructor () {
     let homeDir
     if (process.env.XDG_CONFIG_HOME) {
@@ -28,12 +29,13 @@ module.exports = class Database {
     }
   }
 
-  async init () {
-    await this.addHosts(config.peers)
-  }
-
   async getHosts () {
-    return this.loadValue(HOSTS_KEY, [])
+    let hosts = await this.loadValue(HOSTS_KEY, config.peers)
+    // If the length is 0 add the base config peers back.
+    if (hosts.length === 0) {
+      hosts = config.peers
+    }
+    return hosts
   }
 
   async addHosts (hostsArr) {
@@ -42,8 +44,33 @@ module.exports = class Database {
     return this.saveValue(HOSTS_KEY, allHosts)
   }
 
+  async removeHost (host) {
+    const existingHosts = await this.getHosts()
+    const updatedHosts = existingHosts.filter(currHost => currHost !== host)
+    this.saveValue(HOSTS_KEY, updatedHosts)
+  }
+
   async deleteAllHosts () {
     await this.db.del(HOSTS_KEY)
+  }
+
+  async getManifestHashes () {
+    return this.loadValue(MANIFEST_HASHES_KEY, [])
+  }
+
+  async addManifestHash (hash) {
+    const manifestHashes = await this.getManifestHashes()
+    const updatedHashes = [...new Set([...manifestHashes, ...[hash]])]
+    await this.saveValue(MANIFEST_HASHES_KEY, updatedHashes)
+  }
+
+  async saveManifestData (manifestHash, manifestObj) {
+    await this.addManifestHash(manifestHash)
+    await this.saveValue(manifestHash, manifestObj)
+  }
+
+  async getManifestData (manifestHash) {
+    return this.loadValue(manifestHash, {})
   }
 
   async saveValue (key, value) {
@@ -65,3 +92,5 @@ module.exports = class Database {
     return value
   }
 }
+
+module.exports = new CliDB()

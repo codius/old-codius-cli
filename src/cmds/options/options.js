@@ -18,7 +18,7 @@ const privateVarHash = {
     alias: 'pvh',
     type: 'boolean',
     default: false,
-    description: 'Generate manifest hash'
+    description: 'Generate manifest hash for private variables'
   }
 }
 
@@ -45,7 +45,7 @@ const maxMonthlyRate = {
   'max-monthly-rate': {
     alias: 'max',
     type: 'number',
-    description: 'Max monthly price per contract per host, requires --units flag to be set.'
+    description: 'Max monthly price per contract per host, requires --units flag to be set. Defaults to 10 XRP'
   }
 }
 
@@ -57,11 +57,11 @@ const units = {
   }
 }
 
-const hostNumber = {
-  'host-number': {
-    alias: 'n',
+const hostCount = {
+  'host-count': {
+    alias: 'c',
     type: 'number',
-    description: 'The number of hosts for the contract to run on'
+    description: 'The number of hosts for the contract to run on, default to 1 if not specified'
   }
 }
 
@@ -74,21 +74,12 @@ const noPrompt = {
   }
 }
 
-const validate = {
-  validate: {
-    alias: 'val',
-    type: 'boolean',
-    default: false,
-    description: 'Validates the manifest configuration'
-  }
-}
-
 const addHostEnv = {
   'add-host-env': {
     alias: 'add',
     type: 'boolean',
     default: false,
-    description: 'Adds the hosts used to the $HOSTS env in the manifest'
+    description: 'Adds a $HOST env for each container in the manifest that contains other hosts running the same contract'
   }
 }
 
@@ -96,14 +87,46 @@ const setHost = {
   host: {
     alias: 'h',
     type: 'string',
-    description: 'Host to use for contract, multiple hosts may be used by repeating this option for each host. Cannot be used with host-number command'
+    description: 'Host to use for contract, multiple hosts may be used by repeating this option for each host. Cannot be used with host-count command'
+  }
+}
+
+const removeAllHosts = {
+  'remove-all-hosts': {
+    alias: 'rmall',
+    type: 'boolean',
+    default: false,
+    description: 'Removes all hosts from the local database'
+  }
+}
+
+const removeHost = {
+  'remove-host': {
+    alias: 'rmhost',
+    type: 'string',
+    description: 'Removes host from the local database'
+  }
+}
+
+const getPodManifest = {
+  'get-pod-manifest': {
+    alias: 'm',
+    type: 'string',
+    description: 'Takes the manifest hash and returns the pod manifest from the database'
+  }
+}
+
+const listPods = {
+  'list': {
+    alias: 'l',
+    type: 'boolean',
+    description: 'List all uploaded pods and their expiry times'
   }
 }
 
 const configOptions = {
   ...nonce,
-  ...privateVarHash,
-  ...validate
+  ...privateVarHash
 }
 
 const extendOptions = {
@@ -117,14 +140,26 @@ const uploadOptions = {
   ...duration,
   ...maxMonthlyRate,
   ...units,
-  ...hostNumber,
-  ...addHostEnv,
+  ...hostCount,
   ...setHost,
+  ...addHostEnv,
   ...noPrompt
+}
+
+const hostOptions = {
+  ...removeHost,
+  ...removeAllHosts
+}
+
+const podsOptions = {
+  ...listPods,
+  ...getPodManifest
 }
 
 module.exports = {
   configOptions,
   uploadOptions,
-  extendOptions
+  extendOptions,
+  hostOptions,
+  podsOptions
 }

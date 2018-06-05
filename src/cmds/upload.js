@@ -1,3 +1,9 @@
+/**
+ * @fileOverview
+ * @name upload.js<cmds>
+ * @author Travis Crist
+ */
+
 const debug = require('debug')('codius-cli:upload')
 const { uploadOptions } = require('../cmds/options/options.js')
 const { upload } = require('../handlers/upload.js')

@@ -5,11 +5,11 @@
  */
 
 const { hashManifest } = require('../common/crypto-utils.js')
-const fs = require('fs')
+const fse = require('fs-extra')
 
-function hash ({ manifest }) {
-  const manifestFile = JSON.parse(fs.readFileSync(manifest))
-  console.log(hashManifest(manifestFile))
+async function hash ({ manifest }) {
+  const manifestField = (await fse.readJson(manifest)).manifest
+  console.log(hashManifest(manifestField))
 }
 
 module.exports = {
