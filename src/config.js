@@ -7,7 +7,8 @@
 module.exports = {
   peers: [
     'https://codius.justmoon.com',
-    'https://codius.andros-connector.com'
+    'https://codius.andros-connector.com',
+    'https://codius.feraltc.com'
   ],
   price: {
     month: {

@@ -15,7 +15,7 @@ Codius is an open-source decentralized hosting plaform, built with Interledger. 
 * [Moneyd](https://github.com/interledgerjs/moneyd)
 
 ## Installation
-The Codius CLI can be installed by running the following command to install it to your global npm packages.
+The Codius CLI can be installed globally by running the following command:
 ```
 npm install -g codius
 ```
@@ -26,25 +26,28 @@ It can then be run with the command `codius`.
 All `codius` commands have a `--help` parameter describing their usage, e.g. `codius upload --help` for help with the `upload` command.
 <!---
 ### `config <manifest>`
-Hashes the private variables object in your manifest. Requires one or more options to do anything.
+Hashes the private variables object in your manifest. The manifest is automatically
+updated with the new nonce and hash values. Requires one or more options to do anything.
 
 Arguments:
 * `<manifest>`:
    * Type: Object
-   * Description: The manifest with information about your smart program. Format is described [here](https://github.com/coilhq/codius-manifest).
+   * Description: A path to a manifest containing information about your program. Format is described [here](https://github.com/codius/manifest).
 
 | Options                   | Argument Type | Description                                                                      |
 |---------------------------|---------------|----------------------------------------------------------------------------------|
 | --nonce, -n               | None          | Generates the nonce for the hash of the private variable object in the manifest. |
 | --private-var-hash, --pvh | None          | Generates a hash of the private variable object in the manifest.                 |
 
+
 ### `validate <manifest>`
-Validates the manifest against the manifest schema as described [here](https://github.com/coilhq/codius-manifest).
+Validates the manifest against the manifest schema as described [here](https://github.com/codius/manifest).
 
 Arguments:
 * `<manifest>`
   * Type: Object
-  * Description: A path to a manifest containing information about your program. Format is described [here](https://github.com/coilhq/codius-manifest).
+  * Description: A path to a manifest containing information about your program. Format is described [here](https://github.com/codius/manifest).
+
 --->
 
 ### `hash <manifest>`
@@ -53,7 +56,7 @@ Hashes your manifest file. This hash is used as an identifier for the Codius hos
 Arguments:
 * `<manifest>`
   * Type: Object
-  * Description: A path to the manifest containing information about your proram. Format is described [here](https://github.com/coilhq/codius-manifest).
+  * Description: A path to the manifest containing information about your program. Format is described [here](https://github.com/codius/manifest).
 
 ### `upload <manifest>`
 Uploads a manifest to a number of Codius hosts. By default it uploads it to a single random known host with a duration of 10 minutes.
@@ -62,7 +65,7 @@ Its recommended that you start with a short duration and then extend it to ensur
 Arguments:
 * `<manifest>`
   * Type: Object
-  * Description: A path to the manifest containing information about your program. Format is described [here](https://github.com/coilhq/codius-manifest).
+  * Description: A path to the manifest containing information about your program. Format is described [here](https://github.com/codius/manifest).
 
 | Options                   | Argument Type | Description                                                                                                                                              |
 |---------------------------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -80,7 +83,7 @@ Extends the duration of existing contracts.
 Arguments:
 * `<manifest>`
   * Type: Object
-  * Description: The path to the manifest with information about your program. Format is described [here](https://github.com/coilhq/codius-manifest).
+  * Description: The path to the manifest with information about your program. Format is described [here](https://github.com/codius/manifest).
 
 | Options                   | Argument Type | Description                                                                                            |
 |---------------------------|---------------|--------------------------------------------------------------------------------------------------------|
@@ -94,17 +97,23 @@ Retrieves information about the pods uploaded by the codius cli, their hosts and
 
 | Options                | Argument Type | Description                                                                       |
 |------------------------|---------------|-----------------------------------------------------------------------------------|
-| --list, -l             | Boolean       | Lits all pods uploaded by the codius cli, their hash, hosts, and expiration date. |
+| --list, -l             | Boolean       | Lists all pods uploaded by the codius cli, their hash, hosts, and expiration date. |
 | --get-pod-manifest, -m | String        | Takes the manifest hash and looks up the raw manifest file used for the pod.      |
 
 ### `host`
-Suport modify the hosts local database where peers are stored.
+Modifies the host's local database where peers are stored.
 
 | Options                    | Argument Type | Description                                                               |
 |----------------------------|---------------|---------------------------------------------------------------------------|
 | --remove-host, -rmhost     | String        | Removes the host passed in as a string from the local Codius CLI db.       |
 | --remove-all-hosts, -rmall | Boolean       | Removes all hosts from the local database to reset the peer lookup table. |
 
-## License
+## LevelDB
+The Codius CLI uses LevelDB to store data about hosts and containers. The LevelDB database is stored in the user's home directory with the name ```.codius-cli ``` by default if ```XDG_CONFIG_HOME``` is not set. For example, the folder will have the following path on a machine running OSX:
+```
+/Users/<username>/.codius-cli
+```
+If ```XDG_CONFIG_HOME``` is set the database will simply be named `codius-cli` in that directory.
 
+## License
 Apache-2.0
