@@ -113,7 +113,7 @@ The Codius CLI uses LevelDB to store data about hosts and containers. The LevelD
 ```
 /Users/<username>/.codius-cli
 ```
-If ```XDG_CONFIG_HOME``` is set the configuration folder will simply be named `codius-cli` in that directory.
+If ```XDG_CONFIG_HOME``` is set the database will simply be named `codius-cli` in that directory.
 
 ## License
 Apache-2.0
