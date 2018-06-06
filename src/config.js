@@ -5,7 +5,10 @@
  */
 
 module.exports = {
-  peers: ['https://codius.justmoon.com'],
+  peers: [
+    'https://codius.justmoon.com',
+    'https://codius.andros-connector.com'
+  ],
   price: {
     month: {
       xrp: 10
