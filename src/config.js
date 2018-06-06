@@ -1,6 +1,6 @@
 /**
  * @fileOverview Base Configuration for the codius cli.
- * @name config.js<codius-cli/src>
+ * @name config.js<codius/src>
  * @author Travis Crist
  */
 
@@ -9,6 +9,12 @@ module.exports = {
   price: {
     month: {
       xrp: 10
+    }
+  },
+  duration: 600,
+  version: {
+    codius: {
+      min: 1
     }
   }
 }

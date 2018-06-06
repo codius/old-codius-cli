@@ -13,6 +13,7 @@ const BigNumber = require('bignumber.js')
 const db = require('../common/cli-db.js')
 const { discoverHosts, selectDistributedHosts } = require('../common/discovery.js')
 const { hashManifest } = require('../common/crypto-utils.js')
+const config = require('../config.js')
 
 function checkOptions ({ hostCount, addHostEnv }) {
   // If the host number is set but the add host env is not specified warn the user
@@ -46,13 +47,16 @@ async function uploadToHosts ({ maxMonthlyRate, units, duration }, manifestJson,
   for (const host of hosts) {
     try {
       const optionsResp = await fetch(`${host}/pods?duration=${duration}`, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          Accept: `application/codius-v${config.version.codius.min}+json`,
+          'Content-Type': 'application/json'
+        },
         method: 'OPTIONS',
         body: JSON.stringify(manifestJson)
       })
       const priceQuote = new BigNumber((await optionsResp.json()).price)
       if (priceQuote.isGreaterThan(maxPrice)) {
-        failedPrices.push({ host: host, quotedPrice: priceQuote, maxPrice })
+        failedPrices.push({ host: host, quotedPrice: priceQuote.toString(), maxPrice })
       }
     } catch (err) {
       console.error(`Fetching price quote from host ${host} failed, please try again`)
@@ -62,10 +66,11 @@ async function uploadToHosts ({ maxMonthlyRate, units, duration }, manifestJson,
 
   if (failedPrices.length > 0) {
     console.error('Quoted price from hosts exceeded specified max price from the following hosts')
-    failedPrices.forEach(price => console.error(JSON.stringify(price)))
+    console.error(failedPrices)
     console.error('Please update your max price to successfully upload your contract.')
     throw new Error('Quoted Price exceeded specified max price for contracts.')
   }
+  debug('Price Quotes successful')
 
   const respObj = {
     success: [],
@@ -76,7 +81,10 @@ async function uploadToHosts ({ maxMonthlyRate, units, duration }, manifestJson,
     let resp
     try {
       resp = await fetch(`${host}/pods?duration=${duration}`, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          Accept: `application/codius-v${config.version.codius.min}+json`,
+          'Content-Type': 'application/json'
+        },
         maxPrice: maxPrice,
         method: 'POST',
         body: JSON.stringify(manifestJson)
@@ -111,12 +119,12 @@ async function uploadToHosts ({ maxMonthlyRate, units, duration }, manifestJson,
 
   if (respObj.success.length > 0) {
     console.log('Successfully Uploaded Pods to:')
-    respObj.success.forEach(contract => console.log(contract))
+    console.log(respObj.success)
   }
 
   if (respObj.failed.length > 0) {
     console.log('Failed To Upload Pods to:')
-    respObj.failed.forEach(contract => console.log(contract))
+    console.log(respObj.failed)
   }
   return respObj
 }
@@ -132,7 +140,7 @@ async function updateDatabaseWithHosts (manifestJson, respObj) {
         expiry: obj.expiry
       }
     })
-    debug(`Saving to cli-db Hosts: ${JSON.stringify(hostsObj)}`)
+    debug(`Saving to cli-db Hosts: ${JSON.stringify(hostsObj, null, 2)}`)
 
     const manifestObj = {
       manifest: manifestJson,
@@ -147,7 +155,10 @@ async function upload (options) {
 
   try {
     // TODO: Add manifest validation before starting upload
-    await discoverHosts()
+    // Skip discover if --host option is used.
+    if (!options.host) {
+      await discoverHosts()
+    }
     const uploadHosts = await selectDistributedHosts(options)
     const manifestJson = await fse.readJson(options.manifest)
     await addHostsToManifest(options, manifestJson, uploadHosts)
@@ -162,5 +173,7 @@ async function upload (options) {
 }
 
 module.exports = {
-  upload
+  upload,
+  uploadToHosts,
+  updateDatabaseWithHosts
 }
