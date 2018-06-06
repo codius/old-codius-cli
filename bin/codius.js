@@ -2,7 +2,6 @@
 
 /* eslint-disable no-unused-expressions */
 const yargs = require('yargs')
-const debug = require('debug')('codius-cli')
 
 yargs.commandDir('../src/cmds')
   .help()
