@@ -109,12 +109,11 @@ Modifies the host's local database where peers are stored.
 | --remove-all-hosts, -rmall | Boolean       | Removes all hosts from the local database to reset the peer lookup table. |
 
 ## LevelDB Configuration
-The Codius CLI uses LevelDB to store data about hosts and containers. The LevelDB configuration folder is stored in the user's home directory with the name ```.codius-cli ``` by default. For example, the folder will have the following path on a machine running OSX:
+The Codius CLI uses LevelDB to store data about hosts and containers. The LevelDB database is stored in the user's home directory with the name ```.codius-cli ``` by default if ```XDG_CONFIG_HOME``` is not set. For example, the folder will have the following path on a machine running OSX:
 ```
 /Users/<username>/.codius-cli
 ```
-This feature can be overridden by specifying a different path in the ```XDG_CONFIG_HOME```.
-If such a path is specified, the configuration folder will simply be named `codius-cli`
+If ```XDG_CONFIG_HOME``` is set the configuration folder will simply be named `codius-cli` in that directory.
 
 ## License
 Apache-2.0
