@@ -10,7 +10,7 @@ const debug = require('debug')('codius-cli:price')
 const BigNumber = require('bignumber.js')
 const monthsPerSecond = 0.0000003802571
 
-async function unitsPerHost (maxMonthlyRate = config.price.month.xrp, units = 'XRP', duration = 3600) {
+async function unitsPerHost (maxMonthlyRate = config.price.month.xrp, units = 'XRP', duration = config.duration) {
   const totalFee = new BigNumber(duration * monthsPerSecond * maxMonthlyRate)
   debug(`Total fee in XRP: ${totalFee}`)
   const price = new Price()
