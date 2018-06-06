@@ -5,7 +5,7 @@
  */
 
 module.exports = {
-  peers: ['http://localhost:3000'], // TODO: Update to a proper list of peers to default to
+  peers: ['https://codius.justmoon.com'],
   price: {
     month: {
       xrp: 10
