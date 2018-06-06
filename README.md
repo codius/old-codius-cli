@@ -15,7 +15,7 @@ Codius is an open-source decentralized hosting plaform, built with Interledger. 
 * [Moneyd](https://github.com/interledgerjs/moneyd)
 
 ## Installation
-The Codius CLI can be installed by running the following command to install it to your global npm packages.
+The Codius CLI can be installed globally by running the following command:
 ```
 npm install -g codius
 ```
@@ -26,17 +26,19 @@ It can then be run with the command `codius`.
 All `codius` commands have a `--help` parameter describing their usage, e.g. `codius upload --help` for help with the `upload` command.
 <!---
 ### `config <manifest>`
-Hashes the private variables object in your manifest. Requires one or more options to do anything.
+Hashes the private variables object in your manifest. The manifest is automatically
+updated with the new nonce and hash values. Requires one or more options to do anything.
 
 Arguments:
 * `<manifest>`:
    * Type: Object
-   * Description: The manifest with information about your smart program. Format is described [here](https://github.com/coilhq/codius-manifest).
+   * Description: A path to a manifest containing information about your program. Format is described [here](https://github.com/coilhq/codius-manifest).
 
 | Options                   | Argument Type | Description                                                                      |
 |---------------------------|---------------|----------------------------------------------------------------------------------|
 | --nonce, -n               | None          | Generates the nonce for the hash of the private variable object in the manifest. |
 | --private-var-hash, --pvh | None          | Generates a hash of the private variable object in the manifest.                 |
+
 
 ### `validate <manifest>`
 Validates the manifest against the manifest schema as described [here](https://github.com/coilhq/codius-manifest).
@@ -45,6 +47,7 @@ Arguments:
 * `<manifest>`
   * Type: Object
   * Description: A path to a manifest containing information about your program. Format is described [here](https://github.com/coilhq/codius-manifest).
+
 --->
 
 ### `hash <manifest>`
@@ -53,7 +56,7 @@ Hashes your manifest file. This hash is used as an identifier for the Codius hos
 Arguments:
 * `<manifest>`
   * Type: Object
-  * Description: A path to the manifest containing information about your proram. Format is described [here](https://github.com/coilhq/codius-manifest).
+  * Description: A path to the manifest containing information about your program. Format is described [here](https://github.com/coilhq/codius-manifest).
 
 ### `upload <manifest>`
 Uploads a manifest to a number of Codius hosts. By default it uploads it to a single random known host with a duration of 10 minutes.
@@ -94,11 +97,11 @@ Retrieves information about the pods uploaded by the codius cli, their hosts and
 
 | Options                | Argument Type | Description                                                                       |
 |------------------------|---------------|-----------------------------------------------------------------------------------|
-| --list, -l             | Boolean       | Lits all pods uploaded by the codius cli, their hash, hosts, and expiration date. |
+| --list, -l             | Boolean       | Lists all pods uploaded by the codius cli, their hash, hosts, and expiration date. |
 | --get-pod-manifest, -m | String        | Takes the manifest hash and looks up the raw manifest file used for the pod.      |
 
 ### `host`
-Suport modify the hosts local database where peers are stored.
+Modifies the local hosts database where peers are stored.
 
 | Options                    | Argument Type | Description                                                               |
 |----------------------------|---------------|---------------------------------------------------------------------------|
