@@ -101,7 +101,7 @@ Retrieves information about the pods uploaded by the codius cli, their hosts and
 | --get-pod-manifest, -m | String        | Takes the manifest hash and looks up the raw manifest file used for the pod.      |
 
 ### `host`
-Modifies the local hosts database where peers are stored.
+Modifies the host's local database where peers are stored.
 
 | Options                    | Argument Type | Description                                                               |
 |----------------------------|---------------|---------------------------------------------------------------------------|
