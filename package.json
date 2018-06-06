@@ -4,7 +4,7 @@
   "description": "Command Line Interface for Codius",
   "main": "bin/codius.js",
   "scripts": {
-    "test": "nyc mocha",
+    "test": "npm run lint && nyc mocha",
     "lint": "eslint ."
   },
   "repository": {
@@ -54,7 +54,7 @@
     "yargs": "^11.1.0"
   },
   "nyc": {
-    "check-coverage": true,
+    "check-coverage": false,
     "lines": 80,
     "statements": 80,
     "functions": 80,
