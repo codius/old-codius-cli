@@ -5,7 +5,7 @@
  */
 
 // TODO: replace import with inclusion of public `codius-manifest` manifest package
-const { hashManifest } = require('../common/crypto-utils.js')
+const { hashManifest } = require('codius-manifest')
 const fse = require('fs-extra')
 
 async function hash ({ manifest }) {

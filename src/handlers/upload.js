@@ -12,8 +12,7 @@ const moment = require('moment')
 const BigNumber = require('bignumber.js')
 const db = require('../common/cli-db.js')
 const { discoverHosts, selectDistributedHosts } = require('../common/discovery.js')
-// TODO: replace import with inclusion of public  `codius-manifest` npm package
-const { hashManifest } = require('../common/crypto-utils.js')
+const { hashManifest } = require('codius-manifest')
 
 function checkOptions ({ hostCount, addHostEnv }) {
   // If the host number is set but the add host env is not specified warn the user

@@ -1,6 +1,6 @@
 const debug = require('debug')('codius-cli:validate')
 // TODO: replace import with public  `codius-manifest` package
-const { validateManifest } = require('../../../codius-manifest/index.js')
+const { validateManifest } = require('codius-manifest')
 const fse = require('fs-extra')
 
 async function validate ({ manifest }) {

@@ -1,5 +1,5 @@
 const debug = require('debug')('codius-cli:config')
-const { generateNonce, hashPrivateVars } = require('../../../codius-manifest/index.js')
+const { generateNonce, hashPrivateVars } = require('codius-manifest')
 const fse = require('fs-extra')
 
 async function config ({ manifest, nonce, privateVarHash }) {
@@ -32,7 +32,20 @@ function generatePrivateVarHashes (manifestJson) {
   const privateVars = Object.keys(hashes)
 
   privateVars.map((varName) => {
-    manifestJson.manifest.vars[varName].value = hashes[varName]
+    let publicValue = manifestJson.manifest.vars[varName]
+    if (!publicValue) {
+      debug(`'manifest.vars.${varName}' is not defined`)
+      debug(`Creating new entry for 'manifest.vars.${varName}'...`)
+      const newEntry = {
+        encoding: 'private:sha256',
+        value: hashes[varName]
+      }
+      publicValue = newEntry
+    } else if (publicValue.encoding !== 'private:sha256') {
+      throw new Error(`Private Var Error: '${varName}' is already reserved for a public variable`)
+    } else {
+      publicValue.value = hashes[varName]
+    }
   })
   return manifestJson
 }
