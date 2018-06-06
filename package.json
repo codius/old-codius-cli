@@ -1,6 +1,6 @@
 {
   "name": "codius",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Command Line Interface for Codius",
   "main": "bin/codius.js",
   "scripts": {
