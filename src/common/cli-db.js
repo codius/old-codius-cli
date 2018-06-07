@@ -17,7 +17,7 @@ class CliDB {
   constructor () {
     let homeDir
     if (process.env.XDG_CONFIG_HOME) {
-      homeDir = path.resolve(process.env.XDG_CONFIG_HOME, 'condius-cli')
+      homeDir = path.resolve(process.env.XDG_CONFIG_HOME, 'codius-cli')
     } else {
       homeDir = path.resolve(os.homedir(), '.codius-cli')
     }

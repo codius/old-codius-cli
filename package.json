@@ -1,10 +1,10 @@
 {
   "name": "codius",
-  "version": "1.0.0",
+  "version": "2.0.2",
   "description": "Command Line Interface for Codius",
   "main": "bin/codius.js",
   "scripts": {
-    "test": "nyc mocha",
+    "test": "npm run lint && nyc mocha",
     "lint": "eslint ."
   },
   "repository": {
@@ -15,7 +15,7 @@
     "codius"
   ],
   "author": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/coilhq/codius-cli/issues"
   },
@@ -43,17 +43,16 @@
     "codius-manifest": "^1.0.0",
     "debug": "^3.1.0",
     "fs-extra": "^6.0.1",
-    "ilp-fetch": "^1.3.0",
+    "ilp-fetch": "^1.3.3",
     "ilp-price": "^1.0.1",
     "level": "^4.0.0",
     "lodash.samplesize": "^4.2.0",
     "moment": "^2.22.2",
-    "riverpig": "^1.1.3",
     "thirty-two": "^1.0.2",
     "yargs": "^11.1.0"
   },
   "nyc": {
-    "check-coverage": true,
+    "check-coverage": false,
     "lines": 80,
     "statements": 80,
     "functions": 80,
