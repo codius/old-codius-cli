@@ -4,11 +4,6 @@
 
 The command line interface for uploading and extending pods on Codius.
 
-# Tutorial
-
-
-Codius is an open-source decentralized hosting plaform, built with Interledger. With it, users can run software on servers anywhere in the world and pay for it using any currency. This tutorial will teach you how to upload contracts using the Codius Command-line interface, and pay for hosting using XRP.
-
 ## Prerequisites
 * NodeJS
 * An XRP Wallet (you will need at least 20 XRP to open a new one)
@@ -19,6 +14,7 @@ The Codius CLI can be installed globally by running the following command:
 ```
 npm install -g codius
 ```
+NOTE: add the `--unsafe-perm` flag if installing as root.
 
 It can then be run with the command `codius`.
 
