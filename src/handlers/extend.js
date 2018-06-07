@@ -6,7 +6,7 @@
 
 const debug = require('debug')('codius-cli:extendHandler')
 const { uploadToHosts, updateDatabaseWithHosts } = require('../handlers/upload.js')
-const { hashManifest } = require('../common/crypto-utils.js')
+const { hashManifest } = require('codius-manifest')
 const fse = require('fs-extra')
 const db = require('../common/cli-db.js')
 
