@@ -4,25 +4,31 @@ const fse = require('fs-extra')
 
 async function config ({ manifest, nonce, privateVarHash }) {
   let manifestJson = (await fse.readJson(manifest))
+  try {
+    if (nonce) {
+      console.log('generating nonce values...')
+      generateNonces(manifestJson)
+    }
 
-  if (nonce) {
-    debug('generating nonce values...')
-    generateNonces(manifestJson)
+    if (privateVarHash) {
+      console.log('generating private var hashes...')
+      generatePrivateVarHashes(manifestJson)
+    }
+    console.log('writing changes to manifest file...')
+    console.log(`New manifest: ${JSON.stringify(manifestJson, null, 2)}`)
+    await fse.writeJson(manifest, manifestJson, { spaces: 2 })
+    process.exit(0)
+  } catch (err) {
+    debug(err)
+    process.exit(1)
   }
-
-  if (nonce || privateVarHash) {
-    debug('generating private var hashes...')
-    generatePrivateVarHashes(manifestJson)
-  }
-  debug('writing changes to manifest file...')
-  debug(`New manifest: ${JSON.stringify(manifestJson)}`)
-  fse.writeJson(manifest, manifestJson)
 }
 
 function generateNonces (manifestJson) {
   let privateVars = Object.keys(manifestJson.private.vars)
   privateVars.map((varName) => {
     manifestJson.private.vars[varName].nonce = generateNonce()
+    console.log(`Private Var: ${varName}\nnonce: ${manifestJson.private.vars[varName].nonce}`)
   })
   return manifestJson
 }
@@ -34,15 +40,17 @@ function generatePrivateVarHashes (manifestJson) {
   privateVars.map((varName) => {
     let publicValue = manifestJson.manifest.vars[varName]
     if (!publicValue) {
-      debug(`'manifest.vars.${varName}' is not defined`)
-      debug(`Creating new entry for 'manifest.vars.${varName}'...`)
+      console.log(`'manifest.vars.${varName}' is not defined`)
+      console.log(`Creating new entry for 'manifest.vars.${varName}'...`)
       const newEntry = {
         encoding: 'private:sha256',
         value: hashes[varName]
       }
-      publicValue = newEntry
+      manifestJson.manifest.vars[varName] = newEntry
     } else if (publicValue.encoding !== 'private:sha256') {
-      throw new Error(`Private Var Error: '${varName}' is already reserved for a public variable`)
+      const errorMessage = `Private Var Error: '${varName}' is already reserved for a public variable`
+      console.error(errorMessage)
+      throw new Error(errorMessage)
     } else {
       publicValue.value = hashes[varName]
     }

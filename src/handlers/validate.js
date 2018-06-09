@@ -1,23 +1,35 @@
 const debug = require('debug')('codius-cli:validate')
-// TODO: replace import with public  `codius-manifest` package
 const { validateManifest } = require('codius-manifest')
 const fse = require('fs-extra')
 
-async function validate ({ manifest }) {
-  const manifestJson = (await fse.readJson(manifest))
+async function isManifestValid (manifestJson) {
   debug(`Validating manifest: ${JSON.stringify(manifestJson)}`)
   const errors = validateManifest(manifestJson)
 
   if (errors.length) {
-    debug('Invalid manifest... \nerrors:')
+    console.log('Invalid manifest... \nErrors:')
     errors.map((error) => {
-      debug(JSON.stringify(error))
+      console.log(error)
     })
+    console.log('\nPlease correct errors before uploading manifest to host(s)')
+    return false
   } else {
-    debug('Manifest is valid')
+    console.log('Validation Successful \u2714')
+    return true
+  }
+}
+
+async function validate ({ manifest }) {
+  const manifestJson = (await fse.readJson(manifest))
+  const isValid = isManifestValid(manifestJson)
+  if (isValid) {
+    process.exit(0)
+  } else {
+    process.exit(1)
   }
 }
 
 module.exports = {
-  validate
+  validate,
+  isManifestValid
 }
