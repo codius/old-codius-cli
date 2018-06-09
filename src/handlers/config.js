@@ -15,8 +15,8 @@ async function config ({ manifest, nonce, privateVarHash }) {
       generatePrivateVarHashes(manifestJson)
     }
     console.log('writing changes to manifest file...')
-    console.log(`New manifest: ${JSON.stringify(manifestJson, null, 2)}`)
     await fse.writeJson(manifest, manifestJson, { spaces: 2 })
+    console.log(`New manifest: ${JSON.stringify(manifestJson, null, 2)}`)
     process.exit(0)
   } catch (err) {
     debug(err)
