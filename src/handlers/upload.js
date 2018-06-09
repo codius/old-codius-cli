@@ -12,7 +12,7 @@ const moment = require('moment')
 const BigNumber = require('bignumber.js')
 const db = require('../common/cli-db.js')
 const { discoverHosts, selectDistributedHosts } = require('../common/discovery.js')
-const { hashManifest } = require('../common/crypto-utils.js')
+const { hashManifest } = require('codius-manifest')
 const config = require('../config.js')
 
 function checkOptions ({ hostCount, addHostEnv }) {
