@@ -11,7 +11,7 @@ const nonce = {
     alias: 'n',
     type: 'boolean',
     default: false,
-    description: 'Generate nonce for each private variable in the the manifest'
+    description: 'Generate the nonce and update the hash for each private variable in the the manifest'
   }
 }
 
