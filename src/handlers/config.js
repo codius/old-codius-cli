@@ -10,14 +10,17 @@ async function config ({ manifest, nonce, privateVarHash }) {
       generateNonces(manifestJson)
     }
 
-    if (privateVarHash) {
+    if (nonce || privateVarHash) {
       console.log('generating private var hashes...')
       generatePrivateVarHashes(manifestJson)
+      console.log('writing changes to manifest file...')
+      await fse.writeJson(manifest, manifestJson, { spaces: 2 })
+      console.log(`New manifest: ${JSON.stringify(manifestJson, null, 2)}`)
+      process.exit(0)
+    } else {
+      console.log('`nonce` and `private-var-hash` are not specified. No changes to write to manifest file')
+      process.exit(0)
     }
-    console.log('writing changes to manifest file...')
-    await fse.writeJson(manifest, manifestJson, { spaces: 2 })
-    console.log(`New manifest: ${JSON.stringify(manifestJson, null, 2)}`)
-    process.exit(0)
   } catch (err) {
     debug(err)
     process.exit(1)
