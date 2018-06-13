@@ -6,7 +6,7 @@ The command line interface for uploading and extending pods on Codius.
 
 ## Prerequisites
 * NodeJS
-* An XRP Wallet (you will need at least 20 XRP to open a new one)
+* An XRP Wallet (you will need at least 36 XRP to open a new one)
 * [Moneyd](https://github.com/interledgerjs/moneyd)
 
 ## Installation
