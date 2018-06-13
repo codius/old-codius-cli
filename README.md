@@ -111,5 +111,9 @@ The Codius CLI uses LevelDB to store data about hosts and containers. The LevelD
 ```
 If ```XDG_CONFIG_HOME``` is set the database will simply be named `codius-cli` in that directory.
 
+## Debugging
+To gain access to debug logs add DEBUG=* to the beginning of the codius command. For example:
+```DEBUG=* codius <commands>```
+
 ## License
 Apache-2.0
