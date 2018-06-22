@@ -34,21 +34,24 @@
     "eslint-plugin-standard": "^3.0.1",
     "mocha": "^5.2.0",
     "nyc": "^11.9.0",
-    "sinon": "^5.0.10"
+    "sinon": "^5.1.1"
   },
   "dependencies": {
     "axios": "^0.18.0",
     "bignumber.js": "^7.2.1",
-    "canonical-json": "0.0.4",
-    "codius-manifest": "^1.0.0",
-    "debug": "^3.1.0",
+    "chalk": "^2.4.1",
+    "codius-manifest": "^2.0.3",
     "fs-extra": "^6.0.1",
-    "ilp-fetch": "^1.3.3",
+    "ilp-fetch": "^1.3.5",
+    "ilp-plugin": "^3.1.1",
     "ilp-price": "^1.0.1",
-    "level": "^4.0.0",
+    "inquirer": "^6.0.0",
+    "jsome": "^2.5.0",
     "lodash.samplesize": "^4.2.0",
     "moment": "^2.22.2",
-    "thirty-two": "^1.0.2",
+    "node-dir": "^0.1.17",
+    "ora": "^2.1.0",
+    "riverpig": "^1.1.4",
     "yargs": "^11.1.0"
   },
   "nyc": {
