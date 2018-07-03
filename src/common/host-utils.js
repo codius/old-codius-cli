@@ -11,7 +11,7 @@ const BigNumber = require('bignumber.js')
 const sampleSize = require('lodash.samplesize')
 const { getCurrencyDetails } = require('../common/price.js')
 const { URL } = require('url')
-const { checkStatus } = require('../common/utils.js')
+const { fetchPromise } = require('../common/utils.js')
 const BATCH_SIZE = 7
 
 function cleanHostListUrls (hosts) {
@@ -37,39 +37,18 @@ function cleanHostListUrls (hosts) {
 }
 
 async function fetchHostPrice (host, duration, manifestJson) {
-  try {
-    const res = await fetch(`${host}/pods?duration=${duration}`, {
-      headers: {
-        Accept: `application/codius-v${config.version.codius.min}+json`,
-        'Content-Type': 'application/json'
-      },
-      method: 'OPTIONS',
-      body: JSON.stringify(manifestJson),
-      timeout: 20000 // 20s
-    })
-    if (checkStatus(res)) {
-      return { host, response: await res.json() }
-    } else {
-      return {
-        host,
-        error: res.error.toString() || 'Unknown Error Occurred',
-        text: await res.text() || undefined,
-        status: res.status || undefined
-      }
-    }
-  } catch (err) {
-    return { host, error: err.toString() }
-  }
+  const fetchFunction = fetch(`${host}/pods?duration=${duration}`, {
+    headers: {
+      Accept: `application/codius-v${config.version.codius.min}+json`,
+      'Content-Type': 'application/json'
+    },
+    method: 'OPTIONS',
+    body: JSON.stringify(manifestJson),
+    timeout: 20000 // 20s
+  })
+  return fetchPromise(fetchFunction, host)
 }
 
-function checkPrice (maxMonthlyRate, hostQuotedPrice) {
-  const priceQuote = new BigNumber(hostQuotedPrice)
-  if (priceQuote.isGreaterThan(maxMonthlyRate)) {
-    return false
-  } else {
-    return true
-  }
-}
 async function checkHostsPrices (fetchHostPromises, maxMonthlyRate) {
   logger.debug(`Fetching host prices from ${fetchHostPromises.length} host(s)`)
   const responses = await Promise.all(fetchHostPromises)
@@ -77,7 +56,7 @@ async function checkHostsPrices (fetchHostPromises, maxMonthlyRate) {
   const results = await responses.reduce((acc, curr) => {
     if (curr.error) {
       acc.failed.push(curr)
-    } else if (!checkPrice(maxMonthlyRate, curr.response.price)) {
+    } else if (!new BigNumber(curr.response.price).lte(maxMonthlyRate)) {
       const errorMessage = {
         message: 'Quoted price exceeded specified max price, please increase your max price.',
         host: curr.host,
