@@ -1,3 +1,9 @@
+# Codius CLI Files
+codius.json
+codiusvars.json
+*.codiusstate.json
+codiushosts.json
+
 # Logs
 logs
 *.log

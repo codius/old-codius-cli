@@ -1,152 +1,51 @@
 /**
- * @fileOverview Handler to upload codius contract to network
+ * @fileOverview Handler to upload codius pod to network
  * @name upload.js<handlers>
  * @author Travis Crist
  */
 
-const debug = require('debug')('codius-cli:uploadHandler')
-const fetch = require('ilp-fetch')
+const { getCurrencyDetails, unitsPerHost } = require('../common/price.js')
+const { getValidHosts, cleanHostListUrls } = require('../common/host-utils.js')
+const { discoverHosts } = require('../common/discovery.js')
+const { uploadManifestToHosts } = require('../common/manifest-upload.js')
+const ora = require('ora')
+const { generateManifest } = require('codius-manifest')
+const statusIndicator = ora({ text: '', color: 'blue', spinner: 'point' })
+const codiusState = require('../common/codius-state.js')
 const fse = require('fs-extra')
-const { unitsPerHost } = require('../common/price.js')
-const moment = require('moment')
-const BigNumber = require('bignumber.js')
-const db = require('../common/cli-db.js')
-const { discoverHosts, selectDistributedHosts } = require('../common/discovery.js')
-const { hashManifest } = require('codius-manifest')
+const inquirer = require('inquirer')
 const config = require('../config.js')
+const jsome = require('jsome')
+const logger = require('riverpig')('codius-cli:uploadhandler')
+const chalk = require('chalk')
 
-function checkOptions ({ hostCount, addHostEnv }) {
+function checkOptions ({ addHostEnv }) {
   // If the host number is set but the add host env is not specified warn the user
-  if (hostCount && !addHostEnv) {
-    console.warn('WARNING - Hosts will NOT be added to the $HOSTS env var in the manifest.')
-    console.warn('Add the option --add-host-env to save the selected hosts to $HOSTS')
-    // TODO: Prompt user here using inquirer?
+  if (!addHostEnv) {
+    statusIndicator.warn('Hosts will NOT be added to the HOSTS env in the generated manifest.')
   }
 }
 
-async function addHostsToManifest ({ manifest, addHostEnv }, manifestJson, hosts) {
+async function addHostsToManifest (status, { addHostEnv }, manifestJson, hosts) {
   if (addHostEnv) {
-    debug('Adding hosts to $HOST env in manifest')
+    status.start('Adding hosts to HOSTS env in generated manifest')
     const containers = manifestJson.manifest.containers
     for (const container of containers) {
       if (container.environment.HOSTS) {
-        console.error('Error: HOSTS env variable already exists in a container. Option --add-hosts-env cannot be used if the HOSTS env already exists in any container.')
-        throw new Error('HOSTS env variable already exists in a container.')
+        throw new Error('HOSTS env variable already exists in a container. Option --add-hosts-env cannot be used if the HOSTS env already exists in any container.')
       }
       container.environment = container.environment || {}
       container.environment.HOSTS = JSON.stringify(hosts)
     }
+    status.succeed()
   }
 }
 
-async function uploadToHosts ({ maxMonthlyRate, units, duration }, manifestJson, hosts) {
-  const maxPrice = await unitsPerHost(maxMonthlyRate, units, duration)
-  debug(`Max price in units ${maxPrice}`)
-
-  const failedPrices = []
-  for (const host of hosts) {
-    try {
-      const optionsResp = await fetch(`${host}/pods?duration=${duration}`, {
-        headers: {
-          Accept: `application/codius-v${config.version.codius.min}+json`,
-          'Content-Type': 'application/json'
-        },
-        method: 'OPTIONS',
-        body: JSON.stringify(manifestJson)
-      })
-      const priceQuote = new BigNumber((await optionsResp.json()).price)
-      if (priceQuote.isGreaterThan(maxPrice)) {
-        failedPrices.push({ host: host, quotedPrice: priceQuote.toString(), maxPrice })
-      }
-    } catch (err) {
-      console.error(`Fetching price quote from host ${host} failed, please try again`)
-      throw new Error(`Fetching price quote from host ${host} failed`)
-    }
-  }
-
-  if (failedPrices.length > 0) {
-    console.error('Quoted price from hosts exceeded specified max price from the following hosts')
-    console.error(failedPrices)
-    console.error('Please update your max price to successfully upload your contract.')
-    throw new Error('Quoted Price exceeded specified max price for contracts.')
-  }
-  debug('Price Quotes successful')
-
-  const respObj = {
-    success: [],
-    failed: []
-  }
-
-  for (const host of hosts) {
-    let resp
-    try {
-      resp = await fetch(`${host}/pods?duration=${duration}`, {
-        headers: {
-          Accept: `application/codius-v${config.version.codius.min}+json`,
-          'Content-Type': 'application/json'
-        },
-        maxPrice: maxPrice,
-        method: 'POST',
-        body: JSON.stringify(manifestJson)
-      })
-
-      const respJson = await resp.json()
-      if (resp.status === 200) {
-        const successObj = {
-          url: respJson.url,
-          manifestHash: respJson.manifestHash,
-          host: host,
-          expiry: respJson.expiry,
-          expirationDate: moment(respJson.expiry).format('MM-DD-YYYY h:mm:ss ZZ'),
-          expires: moment().to(moment(respJson.expiry)),
-          pricePaid: resp.price
-        }
-        respObj.success.push(successObj)
-      } else {
-        throw new Error('Request Failed')
-      }
-    } catch (err) {
-      debug(`Pod Upload failed ${err}`)
-      const failedObj = {
-        error: err.message,
-        host,
-        status: resp.status,
-        statusText: resp.statusText
-      }
-      respObj.failed.push(failedObj)
-    }
-  }
-
-  if (respObj.success.length > 0) {
-    console.log('Successfully Uploaded Pods to:')
-    console.log(respObj.success)
-  }
-
-  if (respObj.failed.length > 0) {
-    console.log('Failed To Upload Pods to:')
-    console.log(respObj.failed)
-  }
-  return respObj
-}
-
-async function updateDatabaseWithHosts (manifestJson, respObj) {
-  debug('Saving successful uploaded pods to CliDB')
-  if (respObj.success.length > 0) {
-    const manifestHash = hashManifest(manifestJson.manifest)
-    const existingManifestData = await db.getManifestData(manifestHash)
-    let hostsObj = existingManifestData.hosts || {}
-    respObj.success.forEach(obj => {
-      hostsObj[obj.host] = {
-        expiry: obj.expiry
-      }
-    })
-    debug(`Saving to cli-db Hosts: ${JSON.stringify(hostsObj, null, 2)}`)
-
-    const manifestObj = {
-      manifest: manifestJson,
-      hosts: hostsObj
-    }
-    await db.saveManifestData(manifestHash, manifestObj)
+function getUploadOptions ({ maxMonthlyRate = config.price.amount, duration, units = config.price.units }) {
+  return {
+    maxMonthlyRate: maxMonthlyRate,
+    duration: duration,
+    units: units
   }
 }
 
@@ -154,26 +53,84 @@ async function upload (options) {
   checkOptions(options)
 
   try {
-    // TODO: Add manifest validation before starting upload
+    await codiusState.validateOptions(statusIndicator, options)
+    statusIndicator.start('Generating Codius Manifest')
+    const generatedManifestObj = await generateManifest(options.codiusVarsFile, options.codiusFile)
+
+    let hostList
+    const codiusHostsExists = await fse.pathExists(options.codiusHostsFile)
     // Skip discover if --host option is used.
     if (!options.host) {
-      await discoverHosts()
+      if (codiusHostsExists) {
+        logger.debug('Codius Hosts File exists, or was provided as a parameter, using it for host list.')
+        hostList = (await fse.readJson(options.codiusHostsFile)).hosts
+      } else {
+        statusIndicator.start('Discovering Hosts')
+        const discoverCount = options.hostCount > 50 ? options.hostCount : 50
+        hostList = await discoverHosts(discoverCount)
+        statusIndicator.succeed(`Discovered ${hostList.length} Hosts`)
+      }
+    } else {
+      hostList = options.host
     }
-    const uploadHosts = await selectDistributedHosts(options)
-    const manifestJson = await fse.readJson(options.manifest)
-    await addHostsToManifest(options, manifestJson, uploadHosts)
-    const respObj = await uploadToHosts(options, manifestJson, uploadHosts)
-    await updateDatabaseWithHosts(manifestJson, respObj)
+    const cleanHostList = cleanHostListUrls(hostList)
+    statusIndicator.start('Calculating Max Monthly Rate')
+    const maxMonthlyRate = await unitsPerHost(options)
+    const currencyDetails = await getCurrencyDetails()
+
+    statusIndicator.start(`Checking Host Monthly Rate vs Max Monthly Rate ${maxMonthlyRate.toString()} ${currencyDetails}`)
+    const validHostOptions = {
+      maxMonthlyRate,
+      hostList: cleanHostList,
+      manifestJson: generatedManifestObj,
+      codiusHostsExists
+    }
+    const validHostList = await getValidHosts(options, validHostOptions)
+    statusIndicator.succeed()
+    addHostsToManifest(statusIndicator, options, generatedManifestObj, validHostList)
+
+    if (!options.assumeYes) {
+      console.info(config.lineBreak)
+      console.info('Generated Manifest:')
+      jsome(generatedManifestObj)
+      console.info('will be uploaded to host(s):')
+      jsome(validHostList)
+      console.info('with options:')
+      jsome(getUploadOptions(options))
+      statusIndicator.warn(`All information in the ${chalk.red('manifest')} property will be made ${chalk.red('public')}!`)
+      const userResp = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'continueToUpload',
+          message: `Do you want to proceed with the pod upload?`,
+          default: false
+        }
+      ])
+      if (!userResp.continueToUpload) {
+        statusIndicator.start('User declined to upload pod')
+        throw new Error('Upload aborted by user')
+      }
+    }
+    statusIndicator.start(`Uploading to ${validHostList.length} host(s)`)
+
+    const uploadHostsResponse = await uploadManifestToHosts(statusIndicator,
+      validHostList, options.duration, maxMonthlyRate, generatedManifestObj)
+
+    if (uploadHostsResponse.success.length > 0) {
+      statusIndicator.start('Updating Codius State File')
+      await codiusState.saveCodiusState(options, generatedManifestObj, uploadHostsResponse)
+      statusIndicator.succeed(`Codius State File: ${options.codiusStateFile} Updated`)
+    }
 
     process.exit(0)
   } catch (err) {
-    debug(err)
+    statusIndicator.fail()
+    logger.error(err.message)
+    logger.debug(err)
     process.exit(1)
   }
 }
 
 module.exports = {
-  upload,
-  uploadToHosts,
-  updateDatabaseWithHosts
+  upload
 }

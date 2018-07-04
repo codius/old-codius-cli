@@ -8,17 +8,20 @@ module.exports = {
   peers: [
     'https://codius.justmoon.com',
     'https://codius.andros-connector.com',
-    'https://codius.feraltc.com'
+    'https://codius.africa',
+    'https://codius.risky.business',
+    'https://codius.feraltc.com',
+    'https://codius.tinypolarbear.com'
   ],
   price: {
-    month: {
-      xrp: 10
-    }
+    amount: 10,
+    units: 'XRP'
   },
   duration: 600,
   version: {
     codius: {
       min: 1
     }
-  }
+  },
+  lineBreak: '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
 }

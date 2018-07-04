@@ -4,61 +4,71 @@
  * @author Travis Crist
  */
 
-const db = require('../common/cli-db.js')
 const axios = require('axios')
-const debug = require('debug')('codius-cli:discovery')
+const logger = require('riverpig')('codius-cli:discovery')
 const sampleSize = require('lodash.samplesize')
 const config = require('../config.js')
+const { checkStatus } = require('../common/utils.js')
 
-const HOSTS_PER_DISCOVERY = 5
+const HOSTS_PER_DISCOVERY = 4
+const DISCOVERY_ATTEMPTS = 15
 
-async function findHosts () {
-  const hostSample = sampleSize(await db.getHosts(), HOSTS_PER_DISCOVERY)
-  for (const host of hostSample) {
-    try {
-      const res = await axios.get(host + '/peers', {
-        headers: { Accept: `application/codius-v${config.version.codius.min}+json` }
-      })
-      await db.addHosts(res.data.peers)
-    } catch (err) {
-      db.removeHost(host)
+async function fetchHostPeers (host) {
+  try {
+    const res = await axios.get(`${host}/peers`, {
+      headers: { Accept: `application/codius-v${config.version.codius.min}+json` },
+      timeout: 30000
+    })
+    if (checkStatus(res)) {
+      return { host, peers: res.data.peers }
+    } else {
+      return {
+        host,
+        error: res.error.toString() || 'Unknown Error Occurred',
+        text: await res.text() || '',
+        status: res.status || ''
+      }
     }
+  } catch (err) {
+    return { host, error: err.toString() }
   }
-  const hostList = await db.getHosts()
-  debug(`Host List: ${JSON.stringify(hostList)}`)
-  return hostList
 }
 
-async function discoverHosts () {
-  // try 4 times but bail if the # of hosts is not increasing
+async function findHosts (hostSample) {
+  logger.debug(`Sending Peer Requests to Hosts: ${JSON.stringify(hostSample)}`)
+  const fetchHostPeerPromises = hostSample.map((host) => fetchHostPeers(host))
+  const responses = await Promise.all(fetchHostPeerPromises)
+  const results = await responses.reduce((acc, curr) => {
+    if (curr.error) {
+      acc.failed = [...acc.failed, curr.host]
+    } else {
+      acc.success = [...acc.success, ...curr.peers]
+    }
+    return acc
+  }, { success: [], failed: [] })
+  return results
+}
+
+async function discoverHosts (targetCount) {
   let hostCount = 0
-  for (let i = 0; i < 4; i++) {
-    const hostList = await findHosts()
-    if (hostCount === hostList.length) {
-      return
+  let hostList = config.peers
+  let badHosts = []
+  for (let i = 0; i < DISCOVERY_ATTEMPTS; i++) {
+    const hostSample = sampleSize(hostList, HOSTS_PER_DISCOVERY).filter((host) => !badHosts.includes(host))
+    const results = await findHosts(hostSample)
+    logger.debug(`Host Discovery Attempt# ${i + 1}, Failed: ${JSON.stringify(results.failed)}`)
+    hostList = [...new Set([...hostList, ...results.success])]
+    badHosts = [...new Set([...badHosts, ...results.failed])]
+    if (hostCount === hostList.length || (targetCount && hostList.length >= targetCount)) {
+      logger.debug(`Host Discovery Complete, found ${hostList.length} hosts}`)
+      return hostList
     }
     hostCount = hostList.length
   }
-}
-
-async function selectDistributedHosts ({ host, hostCount = 1 }) {
-  // TODO: Use the ASN Map at https://iptoasn.com/ probably store locally to choose distributed hosts as an array to be used for upload. For now just return a random sample based on the count
-  let uploadHosts = []
-  if (!host) {
-    uploadHosts = sampleSize(await db.getHosts(), hostCount)
-  } else {
-    // Singular host options are a string so we have to make them into an array
-    if (typeof host === 'string') {
-      uploadHosts = [host]
-    } else {
-      uploadHosts = host
-    }
-  }
-  debug(`Hosts for upload: ${uploadHosts}`)
-  return uploadHosts
+  logger.debug(`Host Discovery Complete, found ${hostList.length} hosts}`)
+  return hostList
 }
 
 module.exports = {
-  discoverHosts,
-  selectDistributedHosts
+  discoverHosts
 }
