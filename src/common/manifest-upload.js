@@ -11,6 +11,7 @@ const moment = require('moment')
 const { getCurrencyDetails } = require('../common/price.js')
 const jsome = require('jsome')
 const { checkStatus, fetchPromise } = require('../common/utils.js')
+const chalk = require('chalk')
 const FETCH_TIMEOUT = 70000 // 1m10s
 
 function getParsedResponses (responses, currency, status) {
@@ -65,7 +66,7 @@ function getParsedResponses (responses, currency, status) {
   }
 
   if (parsedResponses.success.length > 0) {
-    status.stopAndPersist({ symbol: 'o', text: `Manifest Hash: ${parsedResponses.success[0].manifestHash}` })
+    status.stopAndPersist({ symbol: `${chalk.blue('o')}`, text: `Manifest Hash: ${chalk.blue(parsedResponses.success[0].manifestHash)}` })
   }
 
   return parsedResponses
