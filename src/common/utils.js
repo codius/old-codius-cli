@@ -22,7 +22,7 @@ async function fetchPromise (fetchFunction, host, timeout = null) {
       const timeoutPromise = new Promise((resolve, reject) => {
         timer = setTimeout(() => {
           resolve({ error: 'Timed out on Upload', status: 408 })
-        }, 70000)
+        }, timeout)
       })
       res = await Promise.race([fetchFunction, timeoutPromise])
       clearTimeout(timer)

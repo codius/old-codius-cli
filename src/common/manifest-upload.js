@@ -10,7 +10,9 @@ const config = require('../config.js')
 const moment = require('moment')
 const { getCurrencyDetails } = require('../common/price.js')
 const jsome = require('jsome')
-const { checkStatus } = require('../common/utils.js')
+const { checkStatus, fetchPromise } = require('../common/utils.js')
+const chalk = require('chalk')
+const FETCH_TIMEOUT = 70000 // 1m10s
 
 function getParsedResponses (responses, currency, status) {
   const parsedResponses = responses.reduce((acc, curr) => {
@@ -64,40 +66,10 @@ function getParsedResponses (responses, currency, status) {
   }
 
   if (parsedResponses.success.length > 0) {
-    status.stopAndPersist({ symbol: 'o', text: `Manifest Hash: ${parsedResponses.success[0].manifestHash}` })
+    status.stopAndPersist({ symbol: `${chalk.blue('o')}`, text: `Manifest Hash: ${chalk.blue(parsedResponses.success[0].manifestHash)}` })
   }
 
   return parsedResponses
-}
-
-async function fetchPromise (fetchFunction, host) {
-  try {
-    let timer
-    const timeoutPromise = new Promise((resolve, reject) => {
-      timer = setTimeout(() => {
-        resolve({ error: 'Timed out on Upload', status: 408 })
-      }, 70000)
-    })
-    const res = await Promise.race([fetchFunction, timeoutPromise])
-    clearTimeout(timer)
-    if (checkStatus(res)) {
-      return {
-        status: res.status,
-        host,
-        response: await res.json(),
-        price: res.price
-      }
-    } else {
-      return {
-        host,
-        error: res.error ? res.error.toString() : 'Unknown Error Occurred',
-        text: res.text ? await res.text() : undefined,
-        status: res.status || undefined
-      }
-    }
-  } catch (err) {
-    return { host, error: err.toString() || undefined }
-  }
 }
 
 async function fetchUploadManifest (host, duration, maxMonthlyRate, manifestJson) {
@@ -109,9 +81,9 @@ async function fetchUploadManifest (host, duration, maxMonthlyRate, manifestJson
     maxPrice: maxMonthlyRate.toString(),
     method: 'POST',
     body: JSON.stringify(manifestJson),
-    timeout: 70000 // 1m10s
+    timeout: FETCH_TIMEOUT
   })
-  return fetchPromise(fetchFunction, host)
+  return fetchPromise(fetchFunction, host, FETCH_TIMEOUT)
 }
 
 async function extendManifestByHashOnHosts (host, duration, maxMonthlyRate, manifestHash) {
@@ -121,9 +93,9 @@ async function extendManifestByHashOnHosts (host, duration, maxMonthlyRate, mani
     },
     maxPrice: maxMonthlyRate.toString(),
     method: 'PUT',
-    timeout: 70000 // 1m10s
+    timeout: FETCH_TIMEOUT
   })
-  return fetchPromise(fetchFunction, host)
+  return fetchPromise(fetchFunction, host, FETCH_TIMEOUT)
 }
 
 async function uploadManifestToHosts (status, hosts, duration, maxMonthlyRate, manifestJson) {
