@@ -122,7 +122,7 @@ async function extend (options) {
     statusIndicator.start('Calculating Max Monthly Rate')
     const maxMonthlyRate = await unitsPerHost(stateOptions)
     const currencyDetails = await getCurrencyDetails()
-    statusIndicator.start(`Checking Host Monthly Rate vs Max Monthly Rate ${maxMonthlyRate.toString()} ${currencyDetails}`)
+    statusIndicator.start(`Checking Host(s) Monthly Rate vs Max Monthly Rate ${maxMonthlyRate.toString()} ${currencyDetails}`)
     await checkPricesOnHosts(hostList, stateOptions.duration, maxMonthlyRate, manifestJson)
     statusIndicator.succeed()
 

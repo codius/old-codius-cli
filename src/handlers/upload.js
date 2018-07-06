@@ -4,6 +4,7 @@
  * @author Travis Crist
  */
 
+const { hashManifest } = require('codius-manifest')
 const { getCurrencyDetails, unitsPerHost } = require('../common/price.js')
 const { getValidHosts, cleanHostListUrls } = require('../common/host-utils.js')
 const { discoverHosts } = require('../common/discovery.js')
@@ -78,7 +79,7 @@ async function upload (options) {
     const maxMonthlyRate = await unitsPerHost(options)
     const currencyDetails = await getCurrencyDetails()
 
-    statusIndicator.start(`Checking Host Monthly Rate vs Max Monthly Rate ${maxMonthlyRate.toString()} ${currencyDetails}`)
+    statusIndicator.start(`Checking Host(s) Monthly Rate vs Max Monthly Rate ${maxMonthlyRate.toString()} ${currencyDetails}`)
     const validHostOptions = {
       maxMonthlyRate,
       hostList: cleanHostList,
@@ -88,11 +89,14 @@ async function upload (options) {
     const validHostList = await getValidHosts(options, validHostOptions)
     statusIndicator.succeed()
     addHostsToManifest(statusIndicator, options, generatedManifestObj, validHostList)
+    const manifestHash = hashManifest(generatedManifestObj.manifest)
 
     if (!options.assumeYes) {
       console.info(config.lineBreak)
       console.info('Generated Manifest:')
       jsome(generatedManifestObj)
+      console.info('Manifest Hash:')
+      console.info(chalk.blue(`${manifestHash}`))
       console.info('will be uploaded to host(s):')
       jsome(validHostList)
       console.info('with options:')
