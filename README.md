@@ -150,9 +150,11 @@ Arguments:
 ## How to Use
 ### Terms
  * **Codius File**: File named `codius.json` which contains the main details of the manifest along with variable place holders to be
- interpolated with the actual values in the  `codiusvars.json` file.
+ interpolated with the actual values in the  `codiusvars.json` file. This file may contain description fields for variables defined in the `manifest.vars` field. The official specification can be found [here](https://github.com/codius/manifest/blob/master/schemas/CodiusSpec.json).
  * **Codius Vars File**: File named `codiusvars.json` which contains the public and private variables which will be interpolated with
- the `codius.json` file to generate the full manifest.
+ the `codius.json` file to generate the full manifest. Similar to `codius.json`, this file may include description
+fields for public variables. The official specification can be found
+[here](https://github.com/codius/manifest/blob/master/schemas/CodiusVarsSpec.json).
  * **Codius State File**: File named `default.codiusstate.json` which is created by the upload command on successful upload to at least one host.
  This file contains the generated interpolated manifest, the hosts its been uploaded to, and details about when the pod expires on those hosts.
 
