@@ -12,7 +12,7 @@ const sampleSize = require('lodash.samplesize')
 const { getCurrencyDetails } = require('../common/price.js')
 const { URL } = require('url')
 const { fetchPromise } = require('../common/utils.js')
-const BATCH_SIZE = 7
+const BATCH_SIZE = 30
 
 function cleanHostListUrls (hosts) {
   let hostList
