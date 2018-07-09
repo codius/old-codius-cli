@@ -77,7 +77,11 @@ Repeat the command above for all the manifests that need to be preserved so the 
 
 * NodeJS
 * An XRP Wallet (you will need at least 35 XRP to run a Codius Host)
-  * The calculation is as follows: reserveBaseXRP + currentOwnerCount * reserveIncrementXRP + 1 * reserveIncrementXRP + OUTGOING_CHANNEL_DEFAULT_AMOUNT_XRP => 20 + 0 * 5 + 1 * 5 + 10 = 35
+  * The calculation is as follows:
+    ```
+    reserveBaseXRP + currentOwnerCount * reserveIncrementXRP + 1 * reserveIncrementXRP +
+    OUTGOING_CHANNEL_DEFAULT_AMOUNT_XRP => 20 + 0 * 5 + 1 * 5 + 10 = 35
+    ```
 * [Moneyd](https://github.com/interledgerjs/moneyd)
 
 ## Installation
