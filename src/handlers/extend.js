@@ -4,6 +4,7 @@
  * @author Travis Crist
  */
 
+const { hashManifest } = require('codius-manifest')
 const { getCurrencyDetails, unitsPerHost } = require('../common/price.js')
 const { checkPricesOnHosts } = require('../common/host-utils.js')
 const { uploadManifestToHosts } = require('../common/manifest-upload.js')
@@ -16,6 +17,7 @@ const inquirer = require('inquirer')
 const jsome = require('jsome')
 const moment = require('moment')
 const logger = require('riverpig')('codius-cli:uploadHandler')
+const chalk = require('chalk')
 
 async function getCodiusStateFilePath () {
   const files = await new Promise((resolve, reject) => {
@@ -95,10 +97,13 @@ async function extend (options) {
     const statusDetails = getHostsStatus(codiusStateJson)
     const stateOptions = getOptions(options, codiusStateJson.options)
     statusIndicator.succeed()
+    const manifestHash = hashManifest(manifestJson.manifest)
 
     if (!options.assumeYes) {
       console.info('Extending Manifest:')
       jsome(manifestJson)
+      console.info('Manifest Hash:')
+      console.info(chalk.blue(`${manifestHash}`))
       console.info('on the following host(s):')
       jsome(hostList)
       console.info('with the current status:')
