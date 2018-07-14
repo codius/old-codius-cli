@@ -5,7 +5,7 @@
  */
 
 const { getCurrencyDetails, unitsPerHost } = require('../common/price.js')
-const { checkPricesOnHosts } = require('../common/host-utils.js')
+const { checkPricesOnHosts, getHostsStatus } = require('../common/host-utils.js')
 const { uploadManifestToHosts } = require('../common/manifest-upload.js')
 const ora = require('ora')
 const statusIndicator = ora({ text: '', color: 'blue', spinner: 'point' })
@@ -14,7 +14,6 @@ const fse = require('fs-extra')
 const nodeDir = require('node-dir')
 const inquirer = require('inquirer')
 const jsome = require('jsome')
-const moment = require('moment')
 const logger = require('riverpig')('codius-cli:uploadHandler')
 
 async function getCodiusStateFilePath () {
@@ -49,27 +48,6 @@ function getOptions ({ maxMonthlyRate, duration, units }, codiusStateOptions) {
     duration: duration || codiusStateOptions.duration,
     units: units || codiusStateOptions.units
   }
-}
-
-function getHostsStatus (codiusStateJson) {
-  const hostList = codiusStateJson.hostList
-  const hostDetails = codiusStateJson.status ? codiusStateJson.status.hostDetails : null
-  return hostList.map(host => {
-    if (hostDetails && hostDetails[host]) {
-      const hostInfo = hostDetails[host]
-      return {
-        host,
-        expirationDate: hostInfo.expirationDate,
-        'expires/expired': moment().to(moment(hostInfo.expirationDate, 'MM-DD-YYYY HH:mm:ss Z')),
-        totalPricePaid: `${hostInfo.price.totalPaid} ${hostInfo.price.units}`
-      }
-    } else {
-      return {
-        host,
-        message: 'No Existing Host Details for this host.'
-      }
-    }
-  })
 }
 
 async function extend (options) {
