@@ -110,7 +110,7 @@ const codiusStateFileExtend = {
 const codiusStateFileCron = {
   'codius-state-file': {
     type: 'string',
-    description: 'Filename or full path to the codius state file to be used.',
+    description: 'Full path to the codius state file to be used.',
     demandOption: true
   }
 }
