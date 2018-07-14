@@ -4,6 +4,8 @@
 [![NPM Package](https://img.shields.io/npm/v/codius.svg?style=flat)](https://npmjs.org/package/codius)
 [![CircleCI](https://circleci.com/gh/codius/codius.svg?style=shield)](https://circleci.com/gh/codius/codius)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+[![Known Vulnerabilities](https://snyk.io/test/github/codius/codius/badge.svg?targetFile=package.json)](https://snyk.io/test/github/codius/codius?targetFile=package.json)
+[![Gitter chat](https://badges.gitter.im/codius/services.png)](https://gitter.im/codius/codius-chat)
 
 The Command Line Interface for uploading and extending pods on Codius.
 
@@ -144,6 +146,40 @@ Arguments:
 | --units, -u                  | Integer       | The unit of currency to pay the Codius hosts with, e.g. 'XRP', requires `--max-monthly-rate, -m` flag to be set. Defaults to 'XRP'.                               |
 | --codius-state-file          | String        | Filename or full path to the codius state file to be generated. If not set the CLI will make a `default.codiusstate.json` file.                                   |
 | --assume-yes, -y             | Boolean       | Say yes to all prompts.                                                                                                                                         |
+### `cron [create|view|remove] [options]`
+Allows the user to automatically extend pods using cron jobs. This command can only be used on pods that have already been uploaded. And only one cron job can be created at a time for each pod.
+
+*NOTE: This command is not supported on Windows machines.*
+
+### `cron create`
+Create a new cron job to extend a pod.
+
+| Options                   | Argument Type | Description                                                                                            |
+|---------------------------|---------------|--------------------------------------------------------------------------------------------------------|
+| --buffer-sec, -b               | Integer       | The minimum duration (in seconds) to maintain on all Codius hosts. Must be greater than 1 hr (3600 seconds). Mutually exclusive with `skip-extend`.                                                                         |
+| --max-monthly-rate, -m       | Integer       | Max rate per month the uploader is willing to pay a Codius host to run the pod, requires `--units, -u` flag to be set. Defaults to 10.                            |
+| --units, -u                  | Integer       | The unit of currency to pay the Codius hosts with, e.g. 'XRP', requires `--max-monthly-rate, -m` flag to be set. Defaults to 'XRP'.                                                                            |
+| --codius-state-file          | String        | Filename or full path to the codius state file. If not set the CLI will search the current directory for `default.codiusstate.json`.                                   |
+| --skip-extend            | Boolean       | Create the extend cron job without initially extending the pod by a buffer.  
+| --assume-yes, -y             | Boolean       | Say yes to all prompts.
+
+### `cron view`
+View existing cron jobs.
+
+| Options                   | Argument Type | Description                                                                                            |
+|---------------------------|---------------|--------------------------------------------------------------------------------------------------------|
+| --codius-state-file          | String        | Filename or full path to the codius state file. If not set the CLI will search the current directory for `default.codiusstate.json`. Mutually exclusive with `all`.                                                                   |
+| --all, -a             | Boolean       | View all existing cron jobs. Mutually exclusive with `codius-state-file`.
+
+
+### `cron remove`
+Remove an existing cron job.
+
+| Options                   | Argument Type | Description                                                                                            |
+|---------------------------|---------------|--------------------------------------------------------------------------------------------------------|
+| --codius-state-file          | String        | Filename or full path to the codius state file. If not set the CLI will search the current directory for `default.codiusstate.json`. Mutually exclusive with `all`.                                                                     |
+| --all, -a             | Boolean       | Remove all existing cron jobs. Mutually exclusive with `codius-state-file`.
+| --assume-yes, -y             | Boolean       | Say yes to all prompts.
 
 ## How to Use
 ### Terms
@@ -349,6 +385,49 @@ Parameters:
 ```
 extend-hash https://hyg2qziqlhdogtbxm347spzrwkibgbzdalyj2qavqra4gzmm5jzq.codius.example.com -d 600 -m 10 -u XRP
 ```
+
+### Extending a Pod with Cron
+
+#### Creating a New Extend Cron Job
+Description: *Creates a new cron job for a running pod.* Searches the current directory for `default.codiusstate.json` since the codius state file is not specified.
+Parameters:
+ * Buffer: `3600` seconds (1 hr)
+ * Max Monthly Rate: `10`
+ * Units: `XRP`
+ ```
+cron create --buffer-sec 3600 -m 10 -u XRP
+ ```
+
+#### View the Cron Job for a Pod
+ Description: *Lists the cron job associated with a running pod.*
+ Parameters:
+  * Codius State File: `codius/default.codiusstate.json`
+  ```
+ cron view --codius-state-file codius/default.codiusstate.json
+  ```
+
+#### View All Codius Cron Jobs
+Description: *Lists all Codius cron jobs.* Parameters:
+* All: flag to view all codius jobs
+```
+cron view -a
+ ```
+
+#### Remove Existing Cron Job for a Pod
+Description: *Removes the cron job for a pod.*
+Parameters:
+ * Codius State File: `codius/default.codiusstate.json`
+```
+  cron remove --codius-state-file codius/default.codiusstate.json
+```
+
+#### Remove All Codius Cron Jobs
+ Description: *Remove all Codius cron jobs.*
+ * All: flag to remove  all codius jobs
+  ```
+ cron remove -a
+  ```
+
 
 ### Advanced Features
 

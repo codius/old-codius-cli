@@ -12,6 +12,7 @@ const sampleSize = require('lodash.samplesize')
 const { getCurrencyDetails } = require('../common/price.js')
 const { URL } = require('url')
 const { fetchPromise } = require('../common/utils.js')
+const moment = require('moment')
 const BATCH_SIZE = 30
 
 function cleanHostListUrls (hosts) {
@@ -44,7 +45,7 @@ async function fetchHostPrice (host, duration, manifestJson) {
     },
     method: 'OPTIONS',
     body: JSON.stringify(manifestJson),
-    timeout: 20000 // 20s
+    timeout: 10000 // 10s
   })
   return fetchPromise(fetchFunction, host)
 }
@@ -79,7 +80,7 @@ async function gatherMatchingValidHosts ({ duration, hostCount = 1 }, hostList, 
   let invalidHosts = []
 
   while (validHosts.length < hostCount && attemptCount < maxAttempts) {
-    logger.debug(`Valid Hosts Found: ${validHosts.length}, attemptCount: ${attemptCount} need: ${hostCount} host(s)`)
+    logger.debug(`Valid Hosts Found: ${validHosts.length}, attemptCount: ${attemptCount} need: ${hostCount} host(s) maxAttempts: ${maxAttempts}`)
     const candidateHosts = sampleSize(hostList, hostCount < BATCH_SIZE ? hostCount : BATCH_SIZE).filter((host) => !invalidHosts.includes(host))
     logger.debug(`Candidate Hosts: ${candidateHosts}`)
     logger.debug(`InvalidHosts: ${invalidHosts}`)
@@ -128,8 +129,30 @@ async function getValidHosts (options, hostOpts) {
   return uploadHosts
 }
 
+function getHostsStatus (codiusStateJson) {
+  const hostList = codiusStateJson.hostList
+  const hostDetails = codiusStateJson.status ? codiusStateJson.status.hostDetails : null
+  return hostList.map(host => {
+    if (hostDetails && hostDetails[host]) {
+      const hostInfo = hostDetails[host]
+      return {
+        host,
+        expirationDate: hostInfo.expirationDate,
+        'expires/expired': moment().to(moment(hostInfo.expirationDate, 'MM-DD-YYYY HH:mm:ss Z')),
+        totalPricePaid: `${hostInfo.price.totalPaid} ${hostInfo.price.units}`
+      }
+    } else {
+      return {
+        host,
+        message: 'No Existing Host Details for this host.'
+      }
+    }
+  })
+}
+
 module.exports = {
   cleanHostListUrls,
   getValidHosts,
-  checkPricesOnHosts
+  checkPricesOnHosts,
+  getHostsStatus
 }
