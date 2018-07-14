@@ -107,6 +107,14 @@ const codiusStateFileExtend = {
   }
 }
 
+const codiusStateFileCron = {
+  'codius-state-file': {
+    type: 'string',
+    description: 'Filename or full path to the codius state file to be used.',
+    demandOption: true
+  }
+}
+
 const overwriteCodiusStateFile = {
   'overwrite-codius-state': {
     alias: 'o',
@@ -130,6 +138,47 @@ const extendOptions = {
   ...units,
   ...codiusStateFileExtend,
   ...assumeYes
+}
+
+const hours = {
+  'hours': {
+    alias: 'h',
+    type: 'number',
+    description: 'The number of hours to extend pod by in cron job.'
+  }
+}
+
+const minutes = {
+  'minutes': {
+    type: 'number',
+    description: 'The number of minutes to extend pod by in cron job.'
+  }
+}
+
+const buffer = {
+  'buffer': {
+    alias: 'b',
+    type: 'number',
+    description: 'The minimum number of hours before pod expiration.'
+  }
+}
+
+const skipExtend = {
+  'skip-extend': {
+    type: 'boolean',
+    description: 'Skip the initial extend step when creating an extend cron job.'
+  }
+}
+
+const cronExtendOptions = {
+  ...maxMonthlyRate,
+  ...units,
+  ...codiusStateFileCron,
+  ...minutes,
+  ...hours,
+  ...assumeYes,
+  ...skipExtend,
+  ...buffer
 }
 
 const uploadOptions = {
@@ -158,5 +207,6 @@ const extendManifestOptions = {
 module.exports = {
   uploadOptions,
   extendOptions,
-  extendManifestOptions
+  extendManifestOptions,
+  cronExtendOptions
 }
