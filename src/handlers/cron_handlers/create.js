@@ -5,15 +5,15 @@ const { uploadManifestToHosts } = require('../../common/manifest-upload.js')
 const ora = require('ora')
 const statusIndicator = ora({ text: '', color: 'blue', spinner: 'point' })
 const crontab = require('crontab')
-const logger = require('riverpig')('codius-cli:createHandler')
+const logger = require('riverpig')('codius-cli:createCronHandler')
 const jsome = require('jsome')
 const { promisify } = require('util')
 const { getHostsStatus } = require('../../common/host-utils')
 const fse = require('fs-extra')
 const inquirer = require('inquirer')
+const { spawn } = require('promisify-child-process')
 
 // <------------------------------------------------------------------------->
-// TODO (vern): Check if codius is installed globally
 // TODO (vern): Check if cron job has already been created for the pod
 // TODO (vern): Add flag to disable cron email notifications
 // <------------------------------------------------------------------------->
@@ -121,7 +121,7 @@ async function addCronJob (options, cmd, manifestHash) {
 
   cronJob.job = job.toString()
   cronJob.creationDate = ((new Date()).toUTCString()) // TODO (vern): Look into using moment??
-  cron.save()
+  cron.save() // TODO (vern): promisify this function and use await?
   logger.debug(`Successfully created and saved cron job ${JSON.stringify(cronJob)}`)
   return cronJob
 }
@@ -280,6 +280,9 @@ async function extendWithCron (options) {
 
 async function createCron (options) {
   try {
+    // Will throw an error if codius cli is not globally installed
+    // TODO (vern): include more explicit error handling
+    await spawn('codius', ['--version'], {})
     if (!options.skipExtend) {
       await extendByBuffer(options)
     }
