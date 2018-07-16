@@ -181,6 +181,10 @@ const cronExtendOptions = {
   ...buffer
 }
 
+const cronViewOptions = {
+  ...codiusStateFileCron
+}
+
 const cronRemoveOptions = {
   ...codiusStateFileCron,
   ...assumeYes
@@ -214,5 +218,6 @@ module.exports = {
   extendOptions,
   extendManifestOptions,
   cronExtendOptions,
+  cronViewOptions,
   cronRemoveOptions
 }
