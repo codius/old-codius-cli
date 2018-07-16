@@ -181,6 +181,11 @@ const cronExtendOptions = {
   ...buffer
 }
 
+const cronRemoveOptions = {
+  ...codiusStateFileCron,
+  ...assumeYes
+}
+
 const uploadOptions = {
   ...duration,
   ...maxMonthlyRate,
@@ -208,5 +213,6 @@ module.exports = {
   uploadOptions,
   extendOptions,
   extendManifestOptions,
-  cronExtendOptions
+  cronExtendOptions,
+  cronRemoveOptions
 }
