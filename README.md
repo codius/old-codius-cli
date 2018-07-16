@@ -4,6 +4,8 @@
 [![NPM Package](https://img.shields.io/npm/v/codius.svg?style=flat)](https://npmjs.org/package/codius)
 [![CircleCI](https://circleci.com/gh/codius/codius.svg?style=shield)](https://circleci.com/gh/codius/codius)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+[![Known Vulnerabilities](https://snyk.io/test/github/codius/codius/badge.svg?targetFile=package.json)](https://snyk.io/test/github/codius/codius?targetFile=package.json)
+[![Gitter chat](https://badges.gitter.im/codius/services.png)](https://gitter.im/codius/codius-chat)
 
 The Command Line Interface for uploading and extending pods on Codius.
 
