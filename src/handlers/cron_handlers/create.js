@@ -101,7 +101,7 @@ function setMinutes (job, minutes) {
 }
 
 function generateExtendCmd ({ duration, maxMonthlyRate, units, codiusStateFile }) {
-  return `codius extend -d ${duration} --max-monthly-rate ${maxMonthlyRate} --units ${units} -y true --codius-state-file ${codiusStateFile}}`
+  return `codius extend -d ${duration} --max-monthly-rate ${maxMonthlyRate} --units ${units} -y --codius-state-file ${codiusStateFile}`
 }
 
 async function addCronJob (options, cmd, manifestHash) {
