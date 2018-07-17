@@ -107,11 +107,18 @@ const codiusStateFileExtend = {
   }
 }
 
-const codiusStateFileCron = {
+const codiusStateFileExtendCron = {
   'codius-state-file': {
     type: 'string',
     description: 'Full path to the codius state file to be used.',
     demandOption: true
+  }
+}
+
+const codiusStateFileCron = {
+  'codius-state-file': {
+    type: 'string',
+    description: 'Full path to the codius state file to be used.'
   }
 }
 
@@ -170,10 +177,26 @@ const skipExtend = {
   }
 }
 
+const removeAll = {
+  'all': {
+    alias: 'a',
+    type: 'boolean',
+    description: 'Remove all existing cron jobs'
+  }
+}
+
+const viewAll = {
+  'all': {
+    alias: 'a',
+    type: 'boolean',
+    description: 'View all existing cron jobs'
+  }
+}
+
 const cronExtendOptions = {
   ...maxMonthlyRate,
   ...units,
-  ...codiusStateFileCron,
+  ...codiusStateFileExtendCron,
   ...minutes,
   ...hours,
   ...assumeYes,
@@ -182,11 +205,13 @@ const cronExtendOptions = {
 }
 
 const cronViewOptions = {
-  ...codiusStateFileCron
+  ...codiusStateFileCron,
+  ...viewAll
 }
 
 const cronRemoveOptions = {
   ...codiusStateFileCron,
+  ...removeAll,
   ...assumeYes
 }
 
