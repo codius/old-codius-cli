@@ -147,26 +147,11 @@ const extendOptions = {
   ...assumeYes
 }
 
-const hours = {
-  'hours': {
-    alias: 'h',
-    type: 'number',
-    description: 'The number of hours to extend pod by in cron job.'
-  }
-}
-
-const minutes = {
-  'minutes': {
-    type: 'number',
-    description: 'The number of minutes to extend pod by in cron job.'
-  }
-}
-
-const buffer = {
+const bufferSec = {
   'buffer': {
     alias: 'b',
     type: 'number',
-    description: 'The minimum number of hours before pod expiration.'
+    description: 'The minimum number of seconds before pod expiration.'
   }
 }
 
@@ -197,11 +182,9 @@ const cronExtendOptions = {
   ...maxMonthlyRate,
   ...units,
   ...codiusStateFileExtendCron,
-  ...minutes,
-  ...hours,
   ...assumeYes,
   ...skipExtend,
-  ...buffer
+  ...bufferSec
 }
 
 const cronViewOptions = {
