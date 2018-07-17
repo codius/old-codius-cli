@@ -8,41 +8,14 @@ const { hashManifest } = require('codius-manifest')
 const { getCurrencyDetails, unitsPerHost } = require('../common/price.js')
 const { checkPricesOnHosts, getHostsStatus } = require('../common/host-utils.js')
 const { uploadManifestToHosts } = require('../common/manifest-upload.js')
+const { getCodiusState } = require('../common/codius-state.js')
 const ora = require('ora')
 const statusIndicator = ora({ text: '', color: 'blue', spinner: 'point' })
 const codiusState = require('../common/codius-state.js')
-const fse = require('fs-extra')
-const nodeDir = require('node-dir')
 const inquirer = require('inquirer')
 const jsome = require('jsome')
 const logger = require('riverpig')('codius-cli:uploadHandler')
 const chalk = require('chalk')
-
-async function getCodiusStateFilePath () {
-  const files = await new Promise((resolve, reject) => {
-    nodeDir.readFiles(process.cwd(), {
-      match: /\.codiusstate\.json$/, recursive: false
-    }, (err, content, next) => {
-      if (err) throw err
-      next()
-    }, (err, files) => {
-      if (err) reject(err)
-      resolve(files)
-    })
-  })
-
-  let codiusStateFilePath
-  if (files.length === 1) {
-    codiusStateFilePath = files[0]
-    logger.debug(`Found ${codiusStateFilePath} file`)
-  } else if (files.length > 1) {
-    throw new Error(`Found multiple *.codiusstate.json files:\n${JSON.stringify(files)}\nonly one *.codiusstate.json file is supported.`)
-  } else {
-    throw new Error(`Unable to find any *codiusstate.json files, please check that one exists in your current working directory ${process.cwd()}. Run 'codius upload <commands>' to create a *.codiusstate.json file.`)
-  }
-
-  return codiusStateFilePath
-}
 
 function getOptions ({ maxMonthlyRate, duration, units }, codiusStateOptions) {
   return {
@@ -54,21 +27,7 @@ function getOptions ({ maxMonthlyRate, duration, units }, codiusStateOptions) {
 
 async function extend (options) {
   try {
-    let codiusStateFilePath
-    if (options.codiusStateFile) {
-      statusIndicator.start(`Checking ${options.codiusStateFile} exists`)
-      const codiusStateExists = await fse.pathExists(options.codiusStateFile)
-      if (!codiusStateExists) {
-        throw new Error(`Codius State File at ${options.codiusStateFile} does not exist, please check the provided file location`)
-      }
-      codiusStateFilePath = options.codiusStateFile
-    } else {
-      statusIndicator.start(`Checking for *.codiusstate.json file in current dir ${process.cwd()}`)
-      codiusStateFilePath = await getCodiusStateFilePath()
-    }
-    const codiusStateJson = await fse.readJson(codiusStateFilePath)
-    statusIndicator.succeed()
-
+    const { codiusStateFilePath, codiusStateJson } = await getCodiusState(statusIndicator, options)
     statusIndicator.start('Getting Codius State Details')
     const manifestJson = codiusStateJson.generatedManifest
     const hostList = codiusStateJson.hostList
