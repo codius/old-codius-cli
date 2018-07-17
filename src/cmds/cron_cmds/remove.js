@@ -1,4 +1,4 @@
-const logger = require('riverpig')('codius-cli:remove.js')
+const logger = require('riverpig')('codius-cli:remove')
 const { removeCron } = require('../../handlers/cron_handlers/remove.js')
 const { cronRemoveOptions } = require('../options/options.js')
 

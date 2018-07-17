@@ -1,4 +1,4 @@
-const logger = require('riverpig')('codius-cli:view.js')
+const logger = require('riverpig')('codius-cli:view')
 const { viewCron } = require('../../handlers/cron_handlers/view.js')
 const { cronViewOptions } = require('../options/options.js')
 

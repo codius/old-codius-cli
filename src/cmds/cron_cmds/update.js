@@ -1,4 +1,4 @@
-const logger = require('riverpig')('codius-cli:update.js')
+const logger = require('riverpig')('codius-cli:update')
 
 exports.command = 'update [options]'
 exports.desc = 'Update an existing cron job.'
