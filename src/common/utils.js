@@ -49,7 +49,18 @@ async function fetchPromise (fetchFunction, host, timeout = null) {
   }
 }
 
+function checkExpirationDates (statusDetails) {
+  statusDetails.map((hostStatus) => {
+    const expirationDate = new Date(hostStatus.expirationDate)
+    const now = new Date()
+    if (expirationDate <= now) {
+      throw new Error(`Codius pod deployed to host ${hostStatus.host} expired at ${hostStatus.expirationDate}`)
+    }
+  })
+}
+
 module.exports = {
   checkStatus,
+  checkExpirationDates,
   fetchPromise
 }
