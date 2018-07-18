@@ -6,10 +6,6 @@ exports.command = 'remove [options]'
 exports.desc = 'Remove an existing cron job.'
 exports.builder = cronRemoveOptions
 exports.handler = async function (argv) {
-  if (argv.all && argv.codiusStateFile) {
-    console.error('Arguments codius-state-file and all are mutually exclusive')
-    process.exit(1)
-  }
   logger.debug(`Remove cron args: ${JSON.stringify(argv)}`)
   removeCron(argv)
 }
