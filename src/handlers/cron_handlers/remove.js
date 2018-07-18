@@ -9,7 +9,7 @@ const fse = require('fs-extra')
 
 async function removeCron (options) {
   try {
-    const { codiusStateJson } = await getCodiusState(statusIndicator, options)
+    const { codiusStateJson, codiusStateFilePath } = await getCodiusState(statusIndicator, options)
     const manifestHash = codiusStateJson.manifestHash
 
     statusIndicator.start('Getting existing cron job(s)')
@@ -52,8 +52,8 @@ async function removeCron (options) {
 
     statusIndicator.start('Updating Codius State File')
     codiusStateJson.status.cronJobs = []
-    await fse.writeJson(options.codiusStateFile, codiusStateJson)
-    statusIndicator.succeed(`Codius State File: ${options.codiusStateFile} updated`)
+    await fse.writeJson(codiusStateFilePath, codiusStateJson)
+    statusIndicator.succeed(`Codius State File: ${codiusStateFilePath} updated`)
     process.exit(0)
   } catch (err) {
     statusIndicator.fail()

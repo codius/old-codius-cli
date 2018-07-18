@@ -107,13 +107,6 @@ const codiusStateFileExtend = {
   }
 }
 
-const codiusStateFileCron = {
-  'codius-state-file': {
-    type: 'string',
-    description: 'Full path to the codius state file to be used.'
-  }
-}
-
 const overwriteCodiusStateFile = {
   'overwrite-codius-state': {
     alias: 'o',
@@ -173,19 +166,19 @@ const viewAll = {
 const cronExtendOptions = {
   ...maxMonthlyRate,
   ...units,
-  ...codiusStateFileCron,
+  ...codiusStateFileExtend,
   ...assumeYes,
   ...skipExtend,
   ...bufferSec
 }
 
 const cronViewOptions = {
-  ...codiusStateFileCron,
+  ...codiusStateFileExtend,
   ...viewAll
 }
 
 const cronRemoveOptions = {
-  ...codiusStateFileCron,
+  ...codiusStateFileExtend,
   ...removeAll,
   ...assumeYes
 }
