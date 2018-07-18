@@ -52,6 +52,7 @@
     "moment": "^2.22.2",
     "node-dir": "^0.1.17",
     "ora": "^2.1.0",
+    "path": "^0.12.7",
     "promisify-child-process": "^2.0.0",
     "riverpig": "^1.1.4",
     "yargs": "^11.1.0"

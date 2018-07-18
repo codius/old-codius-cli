@@ -12,6 +12,7 @@ const config = require('../config.js')
 const examples = require('../common/examples.js')
 const nodeDir = require('node-dir')
 const inquirer = require('inquirer')
+const path = require('path')
 
 async function validateOptions (
   status,
@@ -202,7 +203,7 @@ async function getCodiusState (status, options) {
     if (!codiusStateExists) {
       throw new Error(`Codius State File at ${options.codiusStateFile} does not exist, please check the provided file location`)
     }
-    codiusStateFilePath = options.codiusStateFile
+    codiusStateFilePath = path.resolve(options.codiusStateFile)
   } else {
     status.start(`Checking for *.codiusstate.json file in current dir ${process.cwd()}`)
     codiusStateFilePath = await getCodiusStateFilePath()
