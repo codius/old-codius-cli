@@ -9,6 +9,7 @@ const { getCurrencyDetails, unitsPerHost } = require('../common/price.js')
 const { getValidHosts, cleanHostListUrls } = require('../common/host-utils.js')
 const { discoverHosts } = require('../common/discovery.js')
 const { uploadManifestToHosts } = require('../common/manifest-upload.js')
+const { attachToLogs } = require('../common/pod-control.js')
 const ora = require('ora')
 const { generateManifest } = require('codius-manifest')
 const statusIndicator = ora({ text: '', color: 'blue', spinner: 'point' })
@@ -32,7 +33,7 @@ async function addHostsToManifest (status, { addHostEnv }, manifestJson, hosts) 
     status.start('Adding hosts to HOSTS env in generated manifest')
     const containers = manifestJson.manifest.containers
     for (const container of containers) {
-      if (container.environment.HOSTS) {
+      if (container.environment && container.environment.HOSTS) {
         throw new Error('HOSTS env variable already exists in a container. Option --add-hosts-env cannot be used if the HOSTS env already exists in any container.')
       }
       container.environment = container.environment || {}
@@ -57,6 +58,11 @@ async function upload (options) {
     await codiusState.validateOptions(statusIndicator, options)
     statusIndicator.start('Generating Codius Manifest')
     const generatedManifestObj = await generateManifest(options.codiusVarsFile, options.codiusFile)
+
+    if (options.debug && !generatedManifestObj.manifest.debug) {
+      console.error('In order to use debug mode, please set the debug property in the manifest to true.')
+      throw new Error('Unable to use debug mode for non-debug contract.')
+    }
 
     let hostList
     const codiusHostsExists = await fse.pathExists(options.codiusHostsFile)
@@ -126,7 +132,12 @@ async function upload (options) {
       statusIndicator.succeed(`Codius State File: ${options.codiusStateFile} Updated`)
     }
 
-    process.exit(0)
+    if (options.debug) {
+      const logStream = await attachToLogs(validHostList, manifestHash)
+      logStream.pipe(process.stdout)
+    } else {
+      process.exit(0)
+    }
   } catch (err) {
     statusIndicator.fail()
     logger.error(err.message)
