@@ -107,14 +107,6 @@ const codiusStateFileExtend = {
   }
 }
 
-const codiusStateFileExtendCron = {
-  'codius-state-file': {
-    type: 'string',
-    description: 'Full path to the codius state file to be used.',
-    demandOption: true
-  }
-}
-
 const codiusStateFileCron = {
   'codius-state-file': {
     type: 'string',
@@ -148,7 +140,7 @@ const extendOptions = {
 }
 
 const bufferSec = {
-  'buffer': {
+  'buffer-sec': {
     alias: 'b',
     type: 'number',
     description: 'The minimum number of seconds before pod expiration.'
@@ -181,7 +173,7 @@ const viewAll = {
 const cronExtendOptions = {
   ...maxMonthlyRate,
   ...units,
-  ...codiusStateFileExtendCron,
+  ...codiusStateFileCron,
   ...assumeYes,
   ...skipExtend,
   ...bufferSec
