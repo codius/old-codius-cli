@@ -51,6 +51,14 @@ const hostCount = {
   }
 }
 
+const debug = {
+  'debug': {
+    type: 'boolean',
+    default: false,
+    description: 'Run this pod in debug mode with logging'
+  }
+}
+
 const addHostEnv = {
   'add-host-env': {
     alias: 'a',
@@ -144,7 +152,8 @@ const uploadOptions = {
   ...codiusHostsFile,
   ...codiusStateFileUpload,
   ...overwriteCodiusStateFile,
-  ...assumeYes
+  ...assumeYes,
+  ...debug
 }
 
 const extendManifestOptions = {
