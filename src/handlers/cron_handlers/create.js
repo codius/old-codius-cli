@@ -16,15 +16,11 @@ const { getExtendTimes, generateExtendCmd } = require('../../common/cron-utils.j
 const { checkExpirationDates } = require('../../common/utils.js')
 const defaultExtendTime = 3600
 
-// <------------------------------------------------------------------------->
-// TODO (vern): Add flag to disable cron email notifications
-// <------------------------------------------------------------------------->
-
 function getExtendOptions ({ bufferSec, maxMonthlyRate, units }, codiusStateOptions, codiusStateFilePath) {
   return {
     maxMonthlyRate: maxMonthlyRate || codiusStateOptions.maxMonthlyRate,
     units: units || codiusStateOptions.units,
-    duration: bufferSec, // Exact duration may vary with each host
+    duration: bufferSec || defaultExtendTime, // Exact duration may vary with each host
     codiusStateFile: codiusStateFilePath
   }
 }
@@ -157,7 +153,7 @@ async function extendWithCron (options, { codiusStateFilePath, codiusStateJson }
   const hostList = codiusStateJson.hostList
 
   if (!options.assumeYes) {
-    console.info(`Creating cron job to extend manifest every ${options.bufferSec} seconds with the following command: ${extendCmd}`)
+    console.info(`Creating cron job to extend manifest every ${extendOptions.duration} seconds with the following command: ${extendCmd}`)
     console.info('on the following host(s):')
     jsome(hostList)
     console.info('with the current status:')
