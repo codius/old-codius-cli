@@ -55,7 +55,15 @@ const debug = {
   'debug': {
     type: 'boolean',
     default: false,
-    description: 'Run this pod in debug mode with logging'
+    description: 'Run this pod in debug mode with logging.'
+  }
+}
+
+const tail = {
+  'tail': {
+    type: 'boolean',
+    default: false,
+    description: 'Tail the pods logs on upload. Requires debug mode to be enabled by the --debug flag.'
   }
 }
 
@@ -204,7 +212,8 @@ const uploadOptions = {
   ...codiusStateFileUpload,
   ...overwriteCodiusStateFile,
   ...assumeYes,
-  ...debug
+  ...debug,
+  ...tail
 }
 
 const extendManifestOptions = {
@@ -215,11 +224,17 @@ const extendManifestOptions = {
   ...assumeYes
 }
 
+const tailOptions = {
+  ...setHost,
+  ...codiusStateFileExtend
+}
+
 module.exports = {
   uploadOptions,
   extendOptions,
   extendManifestOptions,
   cronExtendOptions,
   cronViewOptions,
-  cronRemoveOptions
+  cronRemoveOptions,
+  tailOptions
 }

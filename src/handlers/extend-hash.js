@@ -5,7 +5,7 @@
  */
 
 const { getCurrencyDetails, unitsPerHost } = require('../common/price.js')
-const { checkPricesOnHosts, cleanHostListUrls } = require('../common/host-utils.js')
+const { checkPricesOnHosts, getHostList } = require('../common/host-utils.js')
 const { extendManifestByHash } = require('../common/manifest-upload.js')
 const axios = require('axios')
 const ora = require('ora')
@@ -14,7 +14,7 @@ const config = require('../config.js')
 const inquirer = require('inquirer')
 const jsome = require('jsome')
 const logger = require('riverpig')('codius-cli:extend-hash')
-const { checkStatus } = require('../common/utils.js')
+const { checkStatus, getManifestHash } = require('../common/utils.js')
 
 async function getExistingManifest (hostList, manifestHash) {
   let responses = []
@@ -37,30 +37,6 @@ async function getExistingManifest (hostList, manifestHash) {
     throw new Error(`One of the hosts: ${hostList} does not have the associated manifest. Please check your host(s) and try again`)
   }
   return responses[0]
-}
-
-function getHostList ({ host, manifestHash }) {
-  let hostsArr = []
-  if (!host) {
-    const potentialHost = manifestHash.split('.')
-    potentialHost.shift()
-    if (potentialHost.length <= 0) {
-      throw new Error(`The end of ${manifestHash} is not a valid url. Please use the format <manifesth-hash.hostName> to specify the specific pod to extend or the --host parameter.`)
-    }
-    console.log(potentialHost)
-    hostsArr = [`https://${potentialHost.join('.')}`]
-  } else {
-    hostsArr = host
-  }
-
-  return cleanHostListUrls(hostsArr)
-}
-
-function getManifestHash ({ host, manifestHash }) {
-  if (!host) {
-    return manifestHash.split('.')[0].toString().replace(/^https?:\/\//i, '')
-  }
-  return manifestHash
 }
 
 function getOptions ({

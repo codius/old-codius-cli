@@ -59,8 +59,23 @@ function checkExpirationDates (statusDetails) {
   })
 }
 
+function getManifestHash ({ host, manifestHash }) {
+  if (!host) {
+    return manifestHash.split('.')[0].toString().replace(/^https?:\/\//i, '')
+  }
+  return manifestHash
+}
+
+function checkDebugFlag (manifestJson) {
+  if (manifestJson.debug) {
+    throw new Error('Debug is not valid in the codius.json file, use the --debug option to add this flag during upload.')
+  }
+}
+
 module.exports = {
   checkStatus,
   checkExpirationDates,
-  fetchPromise
+  fetchPromise,
+  getManifestHash,
+  checkDebugFlag
 }

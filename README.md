@@ -22,7 +22,12 @@ The Command Line Interface for uploading and extending pods on Codius.
     - [Command Reference](#command-reference)
         - [`upload [options]`](#upload-options)
         - [`extend [options]`](#extend-options)
-        - [`extend-hash <hash> [options]`](#extend-hash-hash-options)
+        - [`extend-hash <manifest-hash> [options]`](#extend-hash-manifest-hash-options)
+        - [`tail [manifest-hash] [options]`](#tail-manifest-hash-options)
+        - [`cron [create|view|remove] [options]`](#cron-createviewremove-options)
+        - [`cron create`](#cron-create)
+        - [`cron view`](#cron-view)
+        - [`cron remove`](#cron-remove)
     - [How to Use](#how-to-use)
         - [Terms](#terms)
         - [Background](#background)
@@ -37,6 +42,18 @@ The Command Line Interface for uploading and extending pods on Codius.
         - [Extending a Pod by Manifest Hash](#extending-a-pod-by-manifest-hash)
             - [Extend by Hash & Host](#extend-by-hash--host)
             - [Extend by Pod Url](#extend-by-pod-url)
+        - [Tailing logs](#tailing-logs)
+            - [Tail logs on upload](#tail-logs-on-upload)
+            - [Enable Debug Mode on upload](#enable-debug-mode-on-upload)
+            - [Tail logs after upload using manifest hash and host](#tail-logs-after-upload-using-manifest-hash-and-host)
+            - [Tail logs after upload using `*.codiusstate.json` file](#tail-logs-after-upload-using-codiusstatejson-file)
+            - [Tail logs after upload using `*.codiusstate.json` file](#tail-logs-after-upload-using-codiusstatejson-file-1)
+        - [Extending a Pod with Cron](#extending-a-pod-with-cron)
+            - [Creating a New Extend Cron Job](#creating-a-new-extend-cron-job)
+            - [View the Cron Job for a Pod](#view-the-cron-job-for-a-pod)
+            - [View All Codius Cron Jobs](#view-all-codius-cron-jobs)
+            - [Remove Existing Cron Job for a Pod](#remove-existing-cron-job-for-a-pod)
+            - [Remove All Codius Cron Jobs](#remove-all-codius-cron-jobs)
         - [Advanced Features](#advanced-features)
             - [Manually Editing `*.codiusstate.json` files](#manually-editing-codiusstatejson-files)
             - [Codius Hosts File](#codius-hosts-file)
@@ -105,17 +122,19 @@ manifest is running appropriately. Upload should only be used for new manifest w
 | Options                      | Argument Type | Description                                                                                                                                                     |
 |------------------------------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | --duration, -d               | Integer       | Duration (in seconds) the pod will be run on all Codius hosts, defaults to 10 mins.                                                                             |
-| --max-monthly-rate, -m       | Integer       | Max rate per month the uploader is willing to pay a Codius host to run the pod, requires `--units, -u` flag to be set. Defaults to 10.                            |
-| --units, -u                  | Integer       | The unit of currency to pay the Codius hosts with, e.g. 'XRP', requires `--max-monthly-rate, -m` flag to be set. Defaults to 'XRP'.                                                                            |
+| --max-monthly-rate, -m       | Integer       | Max rate per month the uploader is willing to pay a Codius host to run the pod, requires `--units, -u` flag to be set. Defaults to 10.                          |
+| --units, -u                  | Integer       | The unit of currency to pay the Codius hosts with, e.g. 'XRP', requires `--max-monthly-rate, -m` flag to be set. Defaults to 'XRP'.                             |
 | --host-count, -c             | Integer       | The number of hosts to upload the pod to. They are discovered from known hosts and selected randomly. Defaults to 1. This and `--host` are mutually exclusive.  |
 | --host                       | String        | The public URI of a host to upload the manifest to. Can be repeated any number of times for multiple hosts. This and `--host-count, -c` are mutually exclusive. |
 | --add-host-env, --a          | Boolean       | Adds a $HOST env in the manifest before upload which contains all the hosts the manifest will be uploaded to.                                                   |
-| --codius-file                | String        | Filename or full path to codius file to be used. If not set the CLI looks in the current directory for the `codius.json` file.                                    |
-| --codius-vars-file           | String        | Filename or full path to the codius variables file to be used. If not set the CLI looks in the current directory for the `codiusvars.json` file.                  |
-| --codius-hosts-file          | String        | Filename or full path to the codius hosts file to be used. If not set the CLI looks in the current directory for the `codiushosts.json` file.                     |
-| --codius-state-file          | String        | Filename or full path to the codius state file to be generated. If not set the CLI will make a `default.codiusstate.json` file.                                   |
-| --overwrite-codius-state, -o | Boolean       | Overwrite the current `*.codiusstate.json` file if it exists.                                                                                                    |
+| --codius-file                | String        | Filename or full path to codius file to be used. If not set the CLI looks in the current directory for the `codius.json` file.                                  |
+| --codius-vars-file           | String        | Filename or full path to the codius variables file to be used. If not set the CLI looks in the current directory for the `codiusvars.json` file.                |
+| --codius-hosts-file          | String        | Filename or full path to the codius hosts file to be used. If not set the CLI looks in the current directory for the `codiushosts.json` file.                   |
+| --codius-state-file          | String        | Filename or full path to the codius state file to be generated. If not set the CLI will make a `default.codiusstate.json` file.                                 |
+| --overwrite-codius-state, -o | Boolean       | Overwrite the current `*.codiusstate.json` file if it exists.                                                                                                   |
 | --assume-yes, -y             | Boolean       | Say yes to all prompts.                                                                                                                                         |
+| --debug                      | Boolean       | Run this pod in debug mode with logging                                                                                                                         |
+| --tail                       | Boolean       | Tail the pods logs on upload. Requires debug mode to be enabled on the pod during upload by the `--debug` flag.                                                 |
 
 ### `extend [options]`
 Used to manage the pod after the initial upload. It extends the duration of a running pod or uploads the pod again if the pod has expired.
@@ -130,7 +149,7 @@ The upload command is used to generate that file. When run successfully the `*.c
 | --codius-state-file          | String        | Filename or full path to the codius state file to be generated. If not set the CLI will make a `default.codiusstate.json` file.                                   |
 | --assume-yes, -y             | Boolean       | Say yes to all prompts.                                                                                                                                         |
 
-### `extend-hash <hash> [options]`
+### `extend-hash <manifest-hash> [options]`
 Extends a pod using the provided manifest hash on the host. Allows the user to extend a pod if they know the manifest hash and the host.
 Useful if the user is not the one who generated the original manifest but wishes to keep it running.
 
@@ -139,13 +158,28 @@ Arguments:
   * Type: String
   * Description: The manifest hash of the manifest to extend.
 
-| Options                   | Argument Type | Description                                                                                            |
-|---------------------------|---------------|--------------------------------------------------------------------------------------------------------|
-| --duration, -d               | Integer       | Duration (in seconds) the pod will be run on all Codius hosts, defaults to 10 mins.                                                                             |
-| --max-monthly-rate, -m       | Integer       | Max rate per month the uploader is willing to pay a Codius host to run the pod, requires `--units, -u` flag to be set. Defaults to 10.                            |
-| --units, -u                  | Integer       | The unit of currency to pay the Codius hosts with, e.g. 'XRP', requires `--max-monthly-rate, -m` flag to be set. Defaults to 'XRP'.                               |
-| --codius-state-file          | String        | Filename or full path to the codius state file to be generated. If not set the CLI will make a `default.codiusstate.json` file.                                   |
-| --assume-yes, -y             | Boolean       | Say yes to all prompts.                                                                                                                                         |
+| Options                | Argument Type | Description                                                                                                                            |
+|------------------------|---------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| --duration, -d         | Integer       | Duration (in seconds) the pod will be run on all Codius hosts, defaults to 10 mins.                                                    |
+| --max-monthly-rate, -m | Integer       | Max rate per month the uploader is willing to pay a Codius host to run the pod, requires `--units, -u` flag to be set. Defaults to 10. |
+| --units, -u            | Integer       | The unit of currency to pay the Codius hosts with, e.g. 'XRP', requires `--max-monthly-rate, -m` flag to be set. Defaults to 'XRP'.    |
+| --codius-state-file    | String        | Filename or full path to the codius state file to be generated. If not set the CLI will make a `default.codiusstate.json` file.        |
+| --host                 | String        | The public URI of a host to extend the manifest.                                                                                       |
+| --assume-yes, -y       | Boolean       | Say yes to all prompts.                                                                                                                |
+
+### `tail [manifest-hash] [options]`
+Tails the logs of the pod if when uploaded the `--debug` flag was used during upload. Useful to see what your pod is doing on a host via its logs.
+
+Arguments:
+* `[manifest-hash]`
+  * Type: String
+  * Description: The manifest hash of the manifest to tail.
+
+| Options             | Argument Type | Description                                                                                                                                                     |
+|---------------------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --host              | String        | The public URI of a host to upload the manifest to. Can be repeated any number of times for multiple hosts. This and `--host-count, -c` are mutually exclusive. |
+| --codius-state-file | String        | Filename or full path to the codius state file to be generated. If not set the CLI will make a `default.codiusstate.json` file.                                 |
+
 ### `cron [create|view|remove] [options]`
 Allows the user to automatically extend pods using cron jobs. This command can only be used on pods that have already been uploaded. And only one cron job can be created at a time for each pod.
 
@@ -160,7 +194,7 @@ Create a new cron job to extend a pod.
 | --max-monthly-rate, -m       | Integer       | Max rate per month the uploader is willing to pay a Codius host to run the pod, requires `--units, -u` flag to be set. Defaults to 10.                            |
 | --units, -u                  | Integer       | The unit of currency to pay the Codius hosts with, e.g. 'XRP', requires `--max-monthly-rate, -m` flag to be set. Defaults to 'XRP'.                                                                            |
 | --codius-state-file          | String        | Filename or full path to the codius state file. If not set the CLI will search the current directory for `default.codiusstate.json`.                                   |
-| --skip-extend            | Boolean       | Create the extend cron job without initially extending the pod by a buffer.  
+| --skip-extend            | Boolean       | Create the extend cron job without initially extending the pod by a buffer.
 | --assume-yes, -y             | Boolean       | Say yes to all prompts.
 
 ### `cron view`
@@ -386,6 +420,49 @@ Parameters:
 extend-hash https://hyg2qziqlhdogtbxm347spzrwkibgbzdalyj2qavqra4gzmm5jzq.codius.example.com -d 600 -m 10 -u XRP
 ```
 
+### Tailing logs
+
+#### Tail logs on upload
+Description: *Enables debug mode and tails logs on upload*
+Parameters:
+ * Upload Parameters: See above for upload params.
+ * Debug: Enables debug logs on the pod.
+ * Tail: Immediately tails the logs of the pod after upload.
+```
+codius upload --host https://codius.example.com -d 600 --debug --tail
+```
+
+#### Enable Debug Mode on upload
+Description: *Enables debug mode on upload*
+Parameters:
+ * Upload Parameters: See above for upload params.
+ * Debug: Enables debug logs on the pod.
+```
+codius upload --host https://codius.example.com -d 600 --debug
+```
+
+#### Tail logs after upload using manifest hash and host
+Description: *Tails the logs of a pod using the manifest hash and host*
+Parameters:
+ * Host: Host where the pod is running you wish to tail.
+```
+codius tail  xb4raigiudbbbqutwp6iftxvmx6zih4sebcpiy5dpwr2w4iypcfa --host https://codius.tinypolarbear.com
+```
+
+#### Tail logs after upload using `*.codiusstate.json` file
+Description: *Tails the logs of all hosts in the `*codiusstate.json` file*
+Parameters:
+ * Codius State File: `codius/default.codiusstate.json`
+```
+codius tail --codius-state-file codius/default.codiusstate.json
+```
+
+#### Tail logs after upload using `*.codiusstate.json` file
+Description: *Tails the logs of all hosts in the `*codiusstate.json` file from the current working directory.*
+```
+codius tail
+```
+
 ### Extending a Pod with Cron
 
 #### Creating a New Extend Cron Job
@@ -407,7 +484,8 @@ cron create --buffer-sec 3600 -m 10 -u XRP
   ```
 
 #### View All Codius Cron Jobs
-Description: *Lists all Codius cron jobs.* Parameters:
+Description: *Lists all Codius cron jobs.*
+Parameters:
 * All: flag to view all codius jobs
 ```
 cron view -a
