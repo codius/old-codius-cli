@@ -202,11 +202,7 @@ async function checkCodiusInstallation () {
     await spawn('codius', ['--version'])
     statusIndicator.succeed()
   } catch (err) {
-    statusIndicator.fail()
-    logger.error(`Unable to run codius cli commands. Check global installation.`)
-    logger.error(`Test command: codius --version`)
-    logger.debug(err)
-    process.exit(1)
+    throw new Error('Unable to run codius cli commands. Check global installation. Test command: codius --version')
   }
 }
 async function createCron (options) {
