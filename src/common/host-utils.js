@@ -12,6 +12,7 @@ const sampleSize = require('lodash.samplesize')
 const { getCurrencyDetails } = require('../common/price.js')
 const { URL } = require('url')
 const { fetchPromise } = require('../common/utils.js')
+const moment = require('moment')
 const BATCH_SIZE = 30
 
 function cleanHostListUrls (hosts) {
@@ -128,8 +129,30 @@ async function getValidHosts (options, hostOpts) {
   return uploadHosts
 }
 
+function getHostsStatus (codiusStateJson) {
+  const hostList = codiusStateJson.hostList
+  const hostDetails = codiusStateJson.status ? codiusStateJson.status.hostDetails : null
+  return hostList.map(host => {
+    if (hostDetails && hostDetails[host]) {
+      const hostInfo = hostDetails[host]
+      return {
+        host,
+        expirationDate: hostInfo.expirationDate,
+        'expires/expired': moment().to(moment(hostInfo.expirationDate, 'MM-DD-YYYY HH:mm:ss Z')),
+        totalPricePaid: `${hostInfo.price.totalPaid} ${hostInfo.price.units}`
+      }
+    } else {
+      return {
+        host,
+        message: 'No Existing Host Details for this host.'
+      }
+    }
+  })
+}
+
 module.exports = {
   cleanHostListUrls,
   getValidHosts,
-  checkPricesOnHosts
+  checkPricesOnHosts,
+  getHostsStatus
 }

@@ -140,6 +140,57 @@ const extendOptions = {
   ...assumeYes
 }
 
+const bufferSec = {
+  'buffer-sec': {
+    alias: 'b',
+    type: 'number',
+    description: 'The minimum number of seconds before pod expiration.'
+  }
+}
+
+const skipExtend = {
+  'skip-extend': {
+    type: 'boolean',
+    description: 'Skip the initial extend step when creating an extend cron job.'
+  }
+}
+
+const removeAll = {
+  'all': {
+    alias: 'a',
+    type: 'boolean',
+    description: 'Remove all existing cron jobs'
+  }
+}
+
+const viewAll = {
+  'all': {
+    alias: 'a',
+    type: 'boolean',
+    description: 'View all existing cron jobs'
+  }
+}
+
+const cronExtendOptions = {
+  ...maxMonthlyRate,
+  ...units,
+  ...codiusStateFileExtend,
+  ...assumeYes,
+  ...skipExtend,
+  ...bufferSec
+}
+
+const cronViewOptions = {
+  ...codiusStateFileExtend,
+  ...viewAll
+}
+
+const cronRemoveOptions = {
+  ...codiusStateFileExtend,
+  ...removeAll,
+  ...assumeYes
+}
+
 const uploadOptions = {
   ...duration,
   ...maxMonthlyRate,
@@ -167,5 +218,8 @@ const extendManifestOptions = {
 module.exports = {
   uploadOptions,
   extendOptions,
-  extendManifestOptions
+  extendManifestOptions,
+  cronExtendOptions,
+  cronViewOptions,
+  cronRemoveOptions
 }

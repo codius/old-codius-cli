@@ -146,6 +146,40 @@ Arguments:
 | --units, -u                  | Integer       | The unit of currency to pay the Codius hosts with, e.g. 'XRP', requires `--max-monthly-rate, -m` flag to be set. Defaults to 'XRP'.                               |
 | --codius-state-file          | String        | Filename or full path to the codius state file to be generated. If not set the CLI will make a `default.codiusstate.json` file.                                   |
 | --assume-yes, -y             | Boolean       | Say yes to all prompts.                                                                                                                                         |
+### `cron [create|view|remove] [options]`
+Allows the user to automatically extend pods using cron jobs. This command can only be used on pods that have already been uploaded. And only one cron job can be created at a time for each pod.
+
+*NOTE: This command is not supported on Windows machines.*
+
+### `cron create`
+Create a new cron job to extend a pod.
+
+| Options                   | Argument Type | Description                                                                                            |
+|---------------------------|---------------|--------------------------------------------------------------------------------------------------------|
+| --buffer-sec, -b               | Integer       | The minimum duration (in seconds) to maintain on all Codius hosts. Must be greater than 1 hr (3600 seconds). Mutually exclusive with `skip-extend`.                                                                         |
+| --max-monthly-rate, -m       | Integer       | Max rate per month the uploader is willing to pay a Codius host to run the pod, requires `--units, -u` flag to be set. Defaults to 10.                            |
+| --units, -u                  | Integer       | The unit of currency to pay the Codius hosts with, e.g. 'XRP', requires `--max-monthly-rate, -m` flag to be set. Defaults to 'XRP'.                                                                            |
+| --codius-state-file          | String        | Filename or full path to the codius state file. If not set the CLI will search the current directory for `default.codiusstate.json`.                                   |
+| --skip-extend            | Boolean       | Skip the initial extend step when creating an extend cron job.  
+| --assume-yes, -y             | Boolean       | Say yes to all prompts.
+
+### `cron view`
+View existing cron jobs.
+
+| Options                   | Argument Type | Description                                                                                            |
+|---------------------------|---------------|--------------------------------------------------------------------------------------------------------|
+| --codius-state-file          | String        | Filename or full path to the codius state file. If not set the CLI will search the current directory for `default.codiusstate.json`. Mutually exclusive with `all`.                                                                   |
+| --all, -a             | Boolean       | View all existing cron jobs. Mutually exclusive with `codius-state-file`.
+
+
+### `cron remove`
+Remove an existing cron job.
+
+| Options                   | Argument Type | Description                                                                                            |
+|---------------------------|---------------|--------------------------------------------------------------------------------------------------------|
+| --codius-state-file          | String        | Filename or full path to the codius state file. If not set the CLI will search the current directory for `default.codiusstate.json`. Mutually exclusive with `all`.                                                                     |
+| --all, -a             | Boolean       | Remove all existing cron jobs. Mutually exclusive with `codius-state-file`.
+| --assume-yes, -y             | Boolean       | Say yes to all prompts.
 
 ## How to Use
 ### Terms
