@@ -16,11 +16,20 @@ const { getExtendTimes, generateExtendCmd } = require('../../common/cron-utils.j
 const { checkExpirationDates } = require('../../common/utils.js')
 const defaultExtendTime = 3600
 
-function getExtendOptions ({ bufferSec, maxMonthlyRate, units }, codiusStateOptions, codiusStateFilePath) {
+function getBufferExtendOptions ({ bufferSec, maxMonthlyRate, units }, codiusStateOptions, codiusStateFilePath) {
   return {
     maxMonthlyRate: maxMonthlyRate || codiusStateOptions.maxMonthlyRate,
     units: units || codiusStateOptions.units,
-    duration: bufferSec || defaultExtendTime, // Exact duration may vary with each host
+    duration: bufferSec,
+    codiusStateFile: codiusStateFilePath
+  }
+}
+
+function getCronExtendOptions ({ maxMonthlyRate, units }, codiusStateOptions, codiusStateFilePath) {
+  return {
+    maxMonthlyRate: maxMonthlyRate || codiusStateOptions.maxMonthlyRate,
+    units: units || codiusStateOptions.units,
+    duration: defaultExtendTime,
     codiusStateFile: codiusStateFilePath
   }
 }
@@ -47,7 +56,7 @@ async function addCronJob (cmd, manifestHash) {
   }
 
   cronJob.job = job.toString()
-  cronJob.creationDate = ((new Date()).toUTCString()) // TODO (vern): Look into using moment??
+  cronJob.creationDate = ((new Date()).toUTCString())
   cron.save()
   logger.debug(`Successfully created and saved cron job ${JSON.stringify(cronJob)}`)
   return cronJob
@@ -68,7 +77,7 @@ async function extendByBuffer (options, { codiusStateFilePath, codiusStateJson }
 
   statusIndicator.start(`Calculating extend times required to maintain a buffer of ${options.bufferSec} sec`)
   const extendTimes = getExtendTimes(statusDetails, options.bufferSec)
-  const extendOptions = getExtendOptions(options, codiusStateJson.options, codiusStateFilePath)
+  const extendOptions = getBufferExtendOptions(options, codiusStateJson.options, codiusStateFilePath)
   statusIndicator.succeed()
 
   if (!options.assumeYes) {
@@ -145,7 +154,7 @@ async function extendWithCron (options, { codiusStateFilePath, codiusStateJson }
   checkExpirationDates(statusDetails)
   statusIndicator.succeed()
 
-  const extendOptions = getExtendOptions(options, codiusStateJson.options, codiusStateFilePath)
+  const extendOptions = getCronExtendOptions(options, codiusStateJson.options, codiusStateFilePath)
   statusIndicator.start('Generating extend command for cron job')
   const extendCmd = generateExtendCmd(extendOptions)
   logger.debug(`Successfully generated cron job extend command: '${extendCmd}'`)
