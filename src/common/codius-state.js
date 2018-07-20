@@ -10,7 +10,9 @@ const BigNumber = require('bignumber.js')
 const { hashManifest } = require('codius-manifest')
 const config = require('../config.js')
 const examples = require('../common/examples.js')
+const nodeDir = require('node-dir')
 const inquirer = require('inquirer')
+const path = require('path')
 
 async function validateOptions (
   status,
@@ -132,6 +134,9 @@ async function saveCodiusState (
   let hostDetailsObj = (codiusStateJson && codiusStateJson.status &&
     codiusStateJson.status.hostDetails) ? codiusStateJson.status.hostDetails : {}
 
+  let cronJobsObj = (codiusStateJson && codiusStateJson.status &&
+    codiusStateJson.status.cronJobs) ? codiusStateJson.status.cronJobs : []
+
   uploadResponses.success.forEach(obj => {
     let existingTotal = new BigNumber(0)
     if (hostDetailsObj && hostDetailsObj[obj.host]) {
@@ -160,14 +165,60 @@ async function saveCodiusState (
     },
     hostList: getHostList(codiusStateJson, uploadResponses),
     status: {
-      hostDetails: hostDetailsObj
+      hostDetails: hostDetailsObj,
+      cronJobs: cronJobsObj
     }
   }
   logger.debug(`Codius State File Obj:\n${JSON.stringify(codiusStateObj, null, 2)}`)
   await fse.writeJson(codiusStateFile, codiusStateObj, { spaces: 2 })
 }
 
+async function getCodiusStateFilePath () {
+  const files = await new Promise((resolve, reject) => {
+    nodeDir.readFiles(process.cwd(), {
+      match: /\.codiusstate\.json$/, recursive: false
+    }, (err, content, next) => {
+      if (err) throw err
+      next()
+    }, (err, files) => {
+      if (err) reject(err)
+      resolve(files)
+    })
+  })
+
+  let codiusStateFilePath
+  if (files.length === 1) {
+    codiusStateFilePath = files[0]
+    logger.debug(`Found ${codiusStateFilePath} file`)
+  } else if (files.length > 1) {
+    throw new Error(`Found multiple *.codiusstate.json files:\n${JSON.stringify(files)}\nonly one *.codiusstate.json file is supported.`)
+  } else {
+    throw new Error(`Unable to find any *codiusstate.json files, please check that one exists in your current working directory ${process.cwd()}. Run 'codius upload <commands>' to create a *.codiusstate.json file.`)
+  }
+
+  return codiusStateFilePath
+}
+
+async function getCodiusState (status, options) {
+  let codiusStateFilePath
+  if (options.codiusStateFile) {
+    status.start(`Checking ${options.codiusStateFile} exists`)
+    const codiusStateExists = await fse.pathExists(options.codiusStateFile)
+    if (!codiusStateExists) {
+      throw new Error(`Codius State File at ${options.codiusStateFile} does not exist, please check the provided file location`)
+    }
+    codiusStateFilePath = path.resolve(options.codiusStateFile)
+  } else {
+    status.start(`Checking for *.codiusstate.json file in current dir ${process.cwd()}`)
+    codiusStateFilePath = await getCodiusStateFilePath()
+  }
+  const codiusStateJson = await fse.readJson(codiusStateFilePath)
+  status.succeed()
+  return { codiusStateFilePath, codiusStateJson }
+}
+
 module.exports = {
   validateOptions,
-  saveCodiusState
+  saveCodiusState,
+  getCodiusState
 }
