@@ -41,7 +41,7 @@
     "bignumber.js": "^7.2.1",
     "binary-split": "^1.0.3",
     "chalk": "^2.4.1",
-    "codius-manifest": "^2.0.3",
+    "codius-manifest": "^2.1.1",
     "crontab": "^1.1.3",
     "fs-extra": "^6.0.1",
     "ilp-fetch": "^1.3.7",
