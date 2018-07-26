@@ -150,9 +150,27 @@ function getHostsStatus (codiusStateJson) {
   })
 }
 
+function getHostList ({ host, manifestHash }) {
+  let hostsArr = []
+  if (!host) {
+    const potentialHost = manifestHash.split('.')
+    potentialHost.shift()
+    if (potentialHost.length <= 0) {
+      throw new Error(`The end of ${manifestHash} is not a valid url. Please use the format <manifesth-hash.hostName> to specify the specific pod to extend or the --host parameter.`)
+    }
+    console.log(potentialHost)
+    hostsArr = [`https://${potentialHost.join('.')}`]
+  } else {
+    hostsArr = host
+  }
+
+  return cleanHostListUrls(hostsArr)
+}
+
 module.exports = {
   cleanHostListUrls,
   getValidHosts,
   checkPricesOnHosts,
-  getHostsStatus
+  getHostsStatus,
+  getHostList
 }

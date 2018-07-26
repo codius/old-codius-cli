@@ -17,6 +17,7 @@ const codiusState = require('../common/codius-state.js')
 const fse = require('fs-extra')
 const inquirer = require('inquirer')
 const config = require('../config.js')
+const { checkDebugFlag } = require('../common/utils.js')
 const jsome = require('jsome')
 const logger = require('riverpig')('codius-cli:uploadhandler')
 const chalk = require('chalk')
@@ -58,10 +59,10 @@ async function upload (options) {
     await codiusState.validateOptions(statusIndicator, options)
     statusIndicator.start('Generating Codius Manifest')
     const generatedManifestObj = await generateManifest(options.codiusVarsFile, options.codiusFile)
+    checkDebugFlag(generatedManifestObj.manifest)
 
-    if (options.debug && !generatedManifestObj.manifest.debug) {
-      console.error('In order to use debug mode, please set the debug property in the manifest to true.')
-      throw new Error('Unable to use debug mode for non-debug contract.')
+    if (options.debug) {
+      generatedManifestObj.manifest.debug = true
     }
 
     let hostList
@@ -108,6 +109,9 @@ async function upload (options) {
       console.info('with options:')
       jsome(getUploadOptions(options))
       statusIndicator.warn(`All information in the ${chalk.red('manifest')} property will be made ${chalk.red('public')}!`)
+      if (options.debug) {
+        statusIndicator.warn(`Debug logging for this pod will be enabled. Logs will be made ${chalk.red('public')}!`)
+      }
       const userResp = await inquirer.prompt([
         {
           type: 'confirm',
@@ -132,9 +136,11 @@ async function upload (options) {
       statusIndicator.succeed(`Codius State File: ${options.codiusStateFile} Updated`)
     }
 
-    if (options.debug) {
+    if (uploadHostsResponse.success.length > 0 && options.debug && options.tail) {
       const logStream = await attachToLogs(validHostList, manifestHash)
-      logStream.pipe(process.stdout)
+      logStream.on('data', data => {
+        logger.info(data.toString())
+      })
     } else {
       process.exit(0)
     }

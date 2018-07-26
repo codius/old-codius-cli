@@ -6,15 +6,14 @@ const { parse: parseUrl } = require('url')
 const { Transform } = require('stream')
 
 async function attachToLogs (hosts, podId) {
-  logger.debug('attaching to logs. hosts=%s podId=%s', hosts, podId)
+  logger.info('attaching to logs. hosts=%s podId=%s', hosts, podId)
 
   const streams = await Promise.all(hosts.map(async host => {
     const url = parseUrl(host)
 
     const get = (url.protocol === 'https:' ? require('https') : require('http')).get
     const res = await new Promise((resolve, reject) => {
-      const req = get(`${host}/pods/${podId}/logs`, resolve)
-
+      const req = get(`${host}/pods/${podId}/logs?follow=true`, resolve)
       req.on('error', err => reject(err))
     })
 

@@ -201,7 +201,7 @@ async function getCodiusStateFilePath () {
 
 async function getCodiusState (status, options) {
   let codiusStateFilePath
-  if (options.codiusStateFile) {
+  if (options.codiusStateFile !== 'default.codiusstate.json') {
     status.start(`Checking ${options.codiusStateFile} exists`)
     const codiusStateExists = await fse.pathExists(options.codiusStateFile)
     if (!codiusStateExists) {

@@ -14,4 +14,5 @@ yargs.commandDir('../src/cmds')
   .implies('units', 'max-monthly-rate')
   .implies('codius-file', 'codius-vars-file')
   .implies('codius-vars-file', 'codius-file')
+  .implies('tail', 'debug')
   .argv
