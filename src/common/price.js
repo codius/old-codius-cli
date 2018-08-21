@@ -45,7 +45,7 @@ async function unitsPerHost ({
     const priceResp = await Promise.race([timeoutPromise, priceFetchPromise])
     clearTimeout(timer)
     if (!priceResp) {
-      throw new Error('unable to make to make ILP Connection, run Codius CLI in debug via command:\n\'DEBUG=* codius <commands>\'\nto verify you are connected.')
+      throw new Error('unable to make ILP Connection, run Codius CLI in debug via command:\n\'DEBUG=* codius <commands>\'\nto verify you are connected.')
     }
     const quotedPrice = new BigNumber(priceResp)
     // Increase the price by 8/100ths of a percent since the server rounds up so we are not  off by a few drops
