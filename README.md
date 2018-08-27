@@ -551,7 +551,7 @@ Run upload which will combine the 2 files and generate a manifest with the priva
 hashed
 
 ## Debugging
-If the Codius CLI is not working as expected debugging can be enabled by adding `DEBUG=codius-cli*` to the beingging of the `codius` command. E.g.
+If the Codius CLI is not working as expected debugging can be enabled by adding `DEBUG=codius-cli*` to the beginning of the `codius` command. E.g.
 ```
 DEBUG=codius-cli* codius
 ```
