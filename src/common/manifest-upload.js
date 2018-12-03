@@ -72,13 +72,13 @@ function getParsedResponses (responses, currency, status) {
   return parsedResponses
 }
 
-async function fetchUploadManifest (host, duration, maxMonthlyRate, manifestJson) {
+async function fetchUploadManifest (host, duration, maxPrice, manifestJson) {
   const fetchFunction = fetch(`${host}/pods?duration=${duration}`, {
     headers: {
       Accept: `application/codius-v${config.version.codius.min}+json`,
       'Content-Type': 'application/json'
     },
-    maxPrice: maxMonthlyRate.toString(),
+    maxPrice: maxPrice.toString(),
     method: 'POST',
     body: JSON.stringify(manifestJson),
     timeout: FETCH_TIMEOUT
@@ -86,33 +86,33 @@ async function fetchUploadManifest (host, duration, maxMonthlyRate, manifestJson
   return fetchPromise(fetchFunction, host, FETCH_TIMEOUT)
 }
 
-async function extendManifestByHashOnHosts (host, duration, maxMonthlyRate, manifestHash) {
+async function extendManifestByHashOnHosts (host, duration, maxPrice, manifestHash) {
   const fetchFunction = fetch(`${host}/pods?manifestHash=${manifestHash}&duration=${duration}`, {
     headers: {
       Accept: `application/codius-v${config.version.codius.min}+json`
     },
-    maxPrice: maxMonthlyRate.toString(),
+    maxPrice: maxPrice.toString(),
     method: 'PUT',
     timeout: FETCH_TIMEOUT
   })
   return fetchPromise(fetchFunction, host, FETCH_TIMEOUT)
 }
 
-async function uploadManifestToHosts (status, hosts, duration, maxMonthlyRate, manifestJson) {
+async function uploadManifestToHosts (status, hosts, duration, maxPrice, manifestJson) {
   const currency = await getCurrencyDetails()
   logger.debug(`Upload to Hosts: ${JSON.stringify(hosts)} Duration: ${duration}`)
   const uploadPromises = hosts.map((host) => {
-    return fetchUploadManifest(host, duration, maxMonthlyRate, manifestJson)
+    return fetchUploadManifest(host, duration, maxPrice, manifestJson)
   })
   const responses = await Promise.all(uploadPromises)
   return getParsedResponses(responses, currency, status)
 }
 
-async function extendManifestByHash (status, hosts, duration, maxMonthlyRate, manifestHash) {
+async function extendManifestByHash (status, hosts, duration, maxPrice, manifestHash) {
   const currency = await getCurrencyDetails()
   logger.debug(`Extending manifest hash ${manifestHash} on Hosts: ${JSON.stringify(hosts)} Duration: ${duration}`)
   const extendPromises = hosts.map((host) => {
-    return extendManifestByHashOnHosts(host, duration, maxMonthlyRate, manifestHash)
+    return extendManifestByHashOnHosts(host, duration, maxPrice, manifestHash)
   })
   const responses = await Promise.all(extendPromises)
   return getParsedResponses(responses, currency, status)

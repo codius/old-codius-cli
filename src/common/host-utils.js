@@ -50,19 +50,19 @@ async function fetchHostPrice (host, duration, manifestJson) {
   return fetchPromise(fetchFunction, host)
 }
 
-async function checkHostsPrices (fetchHostPromises, maxMonthlyRate) {
+async function checkHostsPrices (fetchHostPromises, maxPrice) {
   logger.debug(`Fetching host prices from ${fetchHostPromises.length} host(s)`)
   const responses = await Promise.all(fetchHostPromises)
   const currency = await getCurrencyDetails()
   const results = await responses.reduce((acc, curr) => {
     if (curr.error) {
       acc.failed.push(curr)
-    } else if (!new BigNumber(curr.response.price).lte(maxMonthlyRate)) {
+    } else if (!new BigNumber(curr.response.price).lte(maxPrice)) {
       const errorMessage = {
         message: 'Quoted price exceeded specified max price, please increase your max price.',
         host: curr.host,
         quotedPrice: `${curr.response.price.toString()} ${currency}`,
-        maxPrice: `${maxMonthlyRate} ${currency}`
+        maxPrice: `${maxPrice} ${currency}`
       }
       acc.failed.push(errorMessage)
     } else {
@@ -73,7 +73,7 @@ async function checkHostsPrices (fetchHostPromises, maxMonthlyRate) {
   return results
 }
 
-async function gatherMatchingValidHosts ({ duration, hostCount = 1 }, hostList, maxMonthlyRate, manifestJson) {
+async function gatherMatchingValidHosts ({ duration, hostCount = 1 }, hostList, maxPrice, manifestJson) {
   let validHosts = []
   const maxAttempts = hostList.length
   let attemptCount = 0
@@ -86,7 +86,7 @@ async function gatherMatchingValidHosts ({ duration, hostCount = 1 }, hostList, 
     logger.debug(`InvalidHosts: ${invalidHosts}`)
     attemptCount += candidateHosts.length
     const fetchPromises = candidateHosts.map((host) => fetchHostPrice(host, duration, manifestJson))
-    const priceCheckResults = await checkHostsPrices(fetchPromises, maxMonthlyRate)
+    const priceCheckResults = await checkHostsPrices(fetchPromises, maxPrice)
     if (priceCheckResults.success.length > 0) {
       validHosts = [...new Set([...validHosts, ...priceCheckResults.success.map((obj) => obj.host)])]
     }
@@ -108,9 +108,9 @@ async function gatherMatchingValidHosts ({ duration, hostCount = 1 }, hostList, 
   return uploadHosts
 }
 
-async function checkPricesOnHosts (hosts, duration, maxMonthlyRate, manifestJson) {
+async function checkPricesOnHosts (hosts, duration, maxPrice, manifestJson) {
   const fetchPromises = hosts.map((host) => fetchHostPrice(host, duration, manifestJson))
-  const priceCheckResults = await checkHostsPrices(fetchPromises, maxMonthlyRate)
+  const priceCheckResults = await checkHostsPrices(fetchPromises, maxPrice)
   if (priceCheckResults.failed.length !== 0) {
     throw new Error(JSON.stringify(priceCheckResults.failed, null, 2))
   }
@@ -120,10 +120,10 @@ async function checkPricesOnHosts (hosts, duration, maxMonthlyRate, manifestJson
 async function getValidHosts (options, hostOpts) {
   let uploadHosts = []
   if (options.host || (hostOpts.codiusHostsExists && !options.hostCount)) {
-    await checkPricesOnHosts(hostOpts.hostList, options.duration, hostOpts.maxMonthlyRate, hostOpts.manifestJson)
+    await checkPricesOnHosts(hostOpts.hostList, options.duration, hostOpts.maxPrice, hostOpts.manifestJson)
     uploadHosts = hostOpts.hostList
   } else {
-    uploadHosts = await gatherMatchingValidHosts(options, hostOpts.hostList, hostOpts.maxMonthlyRate, hostOpts.manifestJson)
+    uploadHosts = await gatherMatchingValidHosts(options, hostOpts.hostList, hostOpts.maxPrice, hostOpts.manifestJson)
   }
 
   return uploadHosts

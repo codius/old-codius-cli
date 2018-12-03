@@ -82,13 +82,13 @@ async function upload (options) {
       hostList = options.host
     }
     const cleanHostList = cleanHostListUrls(hostList)
-    statusIndicator.start('Calculating Max Monthly Rate')
-    const maxMonthlyRate = await unitsPerHost(options)
+    statusIndicator.start('Calculating Max Price')
+    const maxPrice = await unitsPerHost(options)
     const currencyDetails = await getCurrencyDetails()
 
-    statusIndicator.start(`Checking Host(s) Monthly Rate vs Max Monthly Rate ${maxMonthlyRate.toString()} ${currencyDetails}`)
+    statusIndicator.start(`Checking Host(s) Price vs Max Price ${maxPrice.toString()} ${currencyDetails}`)
     const validHostOptions = {
-      maxMonthlyRate,
+      maxPrice,
       hostList: cleanHostList,
       manifestJson: generatedManifestObj,
       codiusHostsExists
@@ -128,7 +128,7 @@ async function upload (options) {
     statusIndicator.start(`Uploading to ${validHostList.length} host(s)`)
 
     const uploadHostsResponse = await uploadManifestToHosts(statusIndicator,
-      validHostList, options.duration, maxMonthlyRate, generatedManifestObj)
+      validHostList, options.duration, maxPrice, generatedManifestObj)
 
     if (uploadHostsResponse.success.length > 0) {
       statusIndicator.start('Updating Codius State File')

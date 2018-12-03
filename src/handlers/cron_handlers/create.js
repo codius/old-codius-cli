@@ -104,13 +104,13 @@ async function extendByBuffer (options, { codiusStateFilePath, codiusStateJson }
     }
   }
 
-  statusIndicator.start('Calculating Max Monthly Rate')
-  const maxMonthlyRate = await unitsPerHost(extendOptions)
+  statusIndicator.start('Calculating Max Price')
+  const maxPrice = await unitsPerHost(extendOptions)
   const currencyDetails = await getCurrencyDetails()
   statusIndicator.succeed()
 
-  statusIndicator.start(`Checking Host(s) Monthly Rate vs Max Monthly Rate ${maxMonthlyRate.toString()} ${currencyDetails}`)
-  await checkPricesOnHosts(hostList, extendOptions.duration, maxMonthlyRate, manifestJson)
+  statusIndicator.start(`Checking Host(s) Price vs Max Price ${maxPrice.toString()} ${currencyDetails}`)
+  await checkPricesOnHosts(hostList, extendOptions.duration, maxPrice, manifestJson)
   statusIndicator.succeed()
 
   statusIndicator.start(`Extending pod on ${hostList.length} host(s)`)
@@ -122,7 +122,7 @@ async function extendByBuffer (options, { codiusStateFilePath, codiusStateJson }
     if (duration > 0) {
       const uploadHostList = [host]
       const responses = await uploadManifestToHosts(statusIndicator,
-        uploadHostList, duration, maxMonthlyRate, manifestJson)
+        uploadHostList, duration, maxPrice, manifestJson)
       uploadHostResponses.success = [...uploadHostResponses.success, ...responses.success]
       uploadHostResponses.failed = [...uploadHostResponses.failed, ...responses.failed]
     } else {

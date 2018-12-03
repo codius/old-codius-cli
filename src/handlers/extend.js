@@ -61,16 +61,16 @@ async function extend (options) {
       }
     }
 
-    statusIndicator.start('Calculating Max Monthly Rate')
-    const maxMonthlyRate = await unitsPerHost(stateOptions)
+    statusIndicator.start('Calculating Max Price')
+    const maxPrice = await unitsPerHost(stateOptions)
     const currencyDetails = await getCurrencyDetails()
-    statusIndicator.start(`Checking Host(s) Monthly Rate vs Max Monthly Rate ${maxMonthlyRate.toString()} ${currencyDetails}`)
-    await checkPricesOnHosts(hostList, stateOptions.duration, maxMonthlyRate, manifestJson)
+    statusIndicator.start(`Checking Host(s) Price vs Max Price ${maxPrice.toString()} ${currencyDetails}`)
+    await checkPricesOnHosts(hostList, stateOptions.duration, maxPrice, manifestJson)
     statusIndicator.succeed()
 
     statusIndicator.start(`Uploading to ${hostList.length} host(s)`)
     const uploadHostsResponse = await uploadManifestToHosts(statusIndicator,
-      hostList, stateOptions.duration, maxMonthlyRate, manifestJson)
+      hostList, stateOptions.duration, maxPrice, manifestJson)
 
     statusIndicator.start('Updating Codius State File')
     const saveStateOptions = {
