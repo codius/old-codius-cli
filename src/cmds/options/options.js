@@ -47,7 +47,7 @@ const hostCount = {
     alias: 'c',
     type: 'number',
     description: 'The number of hosts to upload the pod to. They are discovered from known hosts and selected randomly. Defaults to 1.'
-    // NOTE: The default is not specified so we can check for its exisitance to warn the usere about adding the add-hosts-env options.
+    // NOTE: The default is not specified so we can check for its existence to warn the user about adding the add-hosts-env options.
   }
 }
 

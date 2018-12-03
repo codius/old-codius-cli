@@ -46,9 +46,9 @@ async function unitsPerHost ({
     clearTimeout(timer)
     if (!priceResp) {
       if (os.platform() === 'win32') {
-        throw new Error('unable to make to make ILP Connection, run Codius CLI in debug via command:\n\'set DEBUG=* & codius <commands>\'\nto verify you are connected.')
+        throw new Error('unable to make ILP Connection, run Codius CLI in debug via command:\n\'set DEBUG=* & codius <commands>\'\nto verify you are connected.')
       } else {
-        throw new Error('unable to make to make ILP Connection, run Codius CLI in debug via command:\n\'DEBUG=* codius <commands>\'\nto verify you are connected.')
+        throw new Error('unable to make ILP Connection, run Codius CLI in debug via command:\n\'DEBUG=* codius <commands>\'\nto verify you are connected.')
       }
     }
     const quotedPrice = new BigNumber(priceResp)
