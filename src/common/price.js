@@ -26,21 +26,14 @@ async function getCurrencyDetails () {
   return currencyDetails
 }
 
-async function unitsPerHost ({
-  maxMonthlyRate = config.price.amount,
-  units = config.price.units,
-  duration = config.duration
-}) {
-  const totalFee = new BigNumber(duration * monthsPerSecond * maxMonthlyRate)
-  logger.debug(`Total fee in XRP: ${totalFee}`)
+async function getPrice (amount, assetCode) {
   const price = new Price()
-  let amountOfUnits
   try {
     let timer
     const timeoutPromise = new Promise((resolve, reject) => {
       timer = setTimeout(resolve, 2000)
     })
-    const priceFetchPromise = price.fetch(units, totalFee)
+    const priceFetchPromise = price.fetch(assetCode, amount)
 
     const priceResp = await Promise.race([timeoutPromise, priceFetchPromise])
     clearTimeout(timer)
@@ -51,18 +44,29 @@ async function unitsPerHost ({
         throw new Error('unable to make ILP Connection, run Codius CLI in debug via command:\n\'DEBUG=* codius <commands>\'\nto verify you are connected.')
       }
     }
-    const quotedPrice = new BigNumber(priceResp)
-    // Increase the price by 8/100ths of a percent since the server rounds up so we are not  off by a few drops
-    const roundUpUnits = quotedPrice.multipliedBy(roundUpPriceConstant).integerValue(BigNumber.ROUND_CEIL)
-    amountOfUnits = quotedPrice.plus(roundUpUnits)
-    logger.debug(`Total Amount in units: ${amountOfUnits}`)
+    return new BigNumber(priceResp)
   } catch (err) {
     throw new Error(`ilp-price lookup failed: ${err.message}`)
   }
+}
+
+async function unitsPerHost ({
+  maxMonthlyRate = config.price.amount,
+  units = config.price.units,
+  duration = config.duration
+}) {
+  const totalFee = new BigNumber(duration * monthsPerSecond * maxMonthlyRate)
+  logger.debug(`Total fee in ${units}: ${totalFee}`)
+  const quotedPrice = await getPrice(totalFee, units)
+  // Increase the price by 8/100ths of a percent since the server rounds up so we are not off by a few drops
+  const roundUpUnits = quotedPrice.multipliedBy(roundUpPriceConstant).integerValue(BigNumber.ROUND_CEIL)
+  const amountOfUnits = quotedPrice.plus(roundUpUnits)
+  logger.debug(`Total Amount in units: ${amountOfUnits}`)
   return amountOfUnits
 }
 
 module.exports = {
   getCurrencyDetails,
+  getPrice,
   unitsPerHost
 }

@@ -33,6 +33,8 @@ async function fetchPromise (fetchFunction, host, timeout = null) {
       return {
         status: res.status,
         host,
+        hostAssetCode: res.destination ? res.destination.assetCode : undefined,
+        hostAssetScale: res.destination ? res.destination.assetScale : undefined,
         response: await res.json(),
         price: res.price || undefined
       }

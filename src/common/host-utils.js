@@ -9,7 +9,7 @@ const logger = require('riverpig')('codius-cli:host-utils')
 const config = require('../config.js')
 const BigNumber = require('bignumber.js')
 const sampleSize = require('lodash.samplesize')
-const { getCurrencyDetails } = require('../common/price.js')
+const { getCurrencyDetails, getPrice } = require('../common/price.js')
 const { URL } = require('url')
 const { fetchPromise } = require('../common/utils.js')
 const moment = require('moment')
@@ -43,6 +43,7 @@ async function fetchHostPrice (host, duration, manifestJson) {
       Accept: `application/codius-v${config.version.codius.min}+json`,
       'Content-Type': 'application/json'
     },
+    maxPrice: '0',
     method: 'OPTIONS',
     body: JSON.stringify(manifestJson),
     timeout: 10000 // 10s
@@ -54,15 +55,27 @@ async function checkHostsPrices (fetchHostPromises, maxPrice) {
   logger.debug(`Fetching host prices from ${fetchHostPromises.length} host(s)`)
   const responses = await Promise.all(fetchHostPromises)
   const currency = await getCurrencyDetails()
-  const results = await responses.reduce((acc, curr) => {
+  const results = await responses.reduce(async (acc, curr) => {
     if (curr.error) {
       acc.failed.push(curr)
-    } else if (!new BigNumber(curr.response.price).lte(maxPrice)) {
+      return acc
+    }
+    if (!curr.hostAssetCode || !curr.hostAssetScale) {
+      const errorMessage = {
+        message: 'Quote is missing asset code and scale.',
+        host: curr.host
+      }
+      acc.failed.push(errorMessage)
+      return acc
+    }
+    const unscaledQuote = new BigNumber(curr.response.price).dividedBy(Math.pow(10, curr.hostAssetScale))
+    const hostPrice = await getPrice(unscaledQuote, curr.hostAssetCode)
+    if (!hostPrice.lte(maxPrice)) {
       const errorMessage = {
         message: 'Quoted price exceeded specified max price, please increase your max price.',
         host: curr.host,
-        quotedPrice: `${curr.response.price.toString()} ${currency}`,
-        maxPrice: `${maxPrice} ${currency}`
+        quotedPrice: `${hostPrice.toString()} ${currency}`,
+        maxPrice: `${maxPrice.toString()} ${currency}`
       }
       acc.failed.push(errorMessage)
     } else {
