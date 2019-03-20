@@ -4,7 +4,7 @@
  * @author Travis Crist
  */
 
-const fetch = require('ilp-fetch')
+const fetch = require('node-fetch')
 const logger = require('riverpig')('codius-cli:host-utils')
 const config = require('../config.js')
 const BigNumber = require('bignumber.js')
@@ -41,10 +41,10 @@ async function fetchHostPrice (host, duration, manifestJson) {
   const fetchFunction = fetch(`${host}/pods?duration=${duration}`, {
     headers: {
       Accept: `application/codius-v${config.version.codius.min}+json`,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'Pay-Accept': 'interledger-stream'
     },
-    maxPrice: '0',
-    method: 'OPTIONS',
+    method: 'POST',
     body: JSON.stringify(manifestJson),
     timeout: 10000 // 10s
   })
@@ -56,11 +56,7 @@ async function checkHostsPrices (fetchHostPromises, maxPrice) {
   const responses = await Promise.all(fetchHostPromises)
   const currency = await getCurrencyDetails()
   const results = await responses.reduce(async (acc, curr) => {
-    if (curr.error) {
-      acc.failed.push(curr)
-      return acc
-    }
-    if (!curr.hostAssetCode || !curr.hostAssetScale) {
+    if (!curr.headers.get('interledger-stream-asset-code') || !curr.headers.get('interledger-stream-asset-scale')) {
       const errorMessage = {
         message: 'Quote is missing asset code and scale.',
         host: curr.host
@@ -68,8 +64,8 @@ async function checkHostsPrices (fetchHostPromises, maxPrice) {
       acc.failed.push(errorMessage)
       return acc
     }
-    const unscaledQuote = new BigNumber(curr.response.price).dividedBy(Math.pow(10, curr.hostAssetScale))
-    const hostPrice = await getPrice(unscaledQuote, curr.hostAssetCode)
+    const unscaledQuote = new BigNumber(curr.headers.get('interledger-stream-price')).dividedBy(Math.pow(10, curr.headers.get('interledger-stream-asset-scale')))
+    const hostPrice = await getPrice(unscaledQuote, curr.headers.get('interledger-stream-asset-code'))
     if (!hostPrice.lte(maxPrice)) {
       const errorMessage = {
         message: 'Quoted price exceeded specified max price, please increase your max price.',

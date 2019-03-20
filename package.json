@@ -53,6 +53,7 @@
     "moment": "^2.22.2",
     "multi-read-stream": "^2.0.0",
     "node-dir": "^0.1.17",
+    "node-fetch": "^2.6.0",
     "ora": "^2.1.0",
     "riverpig": "^1.1.4",
     "yargs": "^12.0.2"

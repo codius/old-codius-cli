@@ -40,6 +40,7 @@ async function fetchPromise (fetchFunction, host, timeout = null) {
       }
     } else {
       return {
+        headers: res.headers,
         host,
         error: res.error ? res.error.toString() : 'Unknown Error Occurred',
         text: res.text ? await res.text() : undefined,
