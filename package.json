@@ -37,7 +37,7 @@
     "sinon": "^5.1.1"
   },
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.19.0",
     "bignumber.js": "^7.2.1",
     "binary-split": "^1.0.3",
     "chalk": "^2.4.1",
